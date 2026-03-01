@@ -21,20 +21,38 @@ A premium, high-performance link and bookmark dashboard built with the **AHAStac
 
 ### Installation
 
-1. Install dependencies:
+1. **Clone the repository** (if you haven't already):
+   ```bash
+   git clone <repository-url>
+   cd project1
+   ```
+
+2. **Install all Node dependencies**:
+   This includes core packages like Astro, HTMX, and the newly added `dotenv` for environment variable management.
    ```bash
    npm install
    ```
-2. Configure Environment:  
-   Create a `.env` file in the root directory and add your Supabase connection strings:
+
+3. **Create a Supabase Project**:
+   - Go to [supabase.com](https://supabase.com) and create a free account.
+   - Click **New Project** and choose a secure database password (save it!).
+   - Once the database provisions (takes ~2 minutes), go to **Project Settings > API** to find your keys.
+
+4. **Configure your Environment Variables**:  
+   Create a new file named `.env` in the absolute root of the project directory and add your Supabase connection strings:
    ```env
    SUPABASE_URL=https://your-project.supabase.co
    SUPABASE_ANON_KEY=ey...
    ADMIN_PASSWORD=your-secure-master-password
    ```
-3. Provision Database:  
-   Copy the contents of `supabase-schema.sql` and run it in the Supabase SQL Editor to create the required tables.
-4. Start the development server:
+
+5. **Provision the Database Schema**:  
+   - Open your Supabase dashboard and navigate to the **SQL Editor** tab.
+   - Click **New Query**.
+   - Copy the entire contents of the `supabase-schema.sql` file provided in this repository.
+   - Paste it into the editor and click **Run**. This creates the `panels`, `categories`, `links`, and `backups` tables.
+
+6. **Start the development server**:
    ```bash
    npm run dev
    ```
