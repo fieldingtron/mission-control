@@ -698,6 +698,10 @@ header h1 {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s, transform 0.2s;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 20px;
+  /* Add margin bottom to space out cards vertically within columns */
 }
 
 .card:hover {
@@ -852,10 +856,21 @@ header h1 {
 
 /* ── Grid ────────────────────────────────────────────────── */
 #grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  align-items: start;
+  column-count: 3;
+  column-gap: 24px;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  #grid {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  #grid {
+    column-count: 1;
+  }
 }
 
 /* ── Icons & Buttons ──────────────────────────────────────── */
