@@ -16,7 +16,13 @@ function getFavicon(url) {
 }
 ---
 
-<li class="link-row" id={`link-${link.id}`} data-id={link.id}>
+<li
+  class="link-row"
+  id={`link-${link.id}`}
+  data-id={link.id}
+  data-search={`${link.name.toLowerCase()} ${link.url.toLowerCase()} ${link.description?.toLowerCase() || ""}`}
+  x-show="!searchQuery || $el.dataset.search.includes(searchQuery.toLowerCase()) || $el.closest('.card').dataset.catname.includes(searchQuery.toLowerCase())"
+>
   <div
     style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;"
   >

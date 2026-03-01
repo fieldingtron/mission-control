@@ -15,3 +15,6 @@ data/
 # Databases
 *.db
 *.sqlite
+
+# Testing
+test_db.js

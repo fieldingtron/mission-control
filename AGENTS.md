@@ -25,11 +25,11 @@ The project features a premium local development setup:
 
 ## Architecture
 
-**Astro 5 in SSR mode** (`output: 'server'`, Node adapter standalone). The app is a link/bookmark dashboard where links are grouped by categories.
+**Astro 5 in SSR mode** (`output: 'server'`, Node adapter standalone). The app is a link/bookmark dashboard where links are grouped by categories, which are in turn organized into panels.
 
 ### Data layer
 
-`src/lib/db.ts` initializes a SQLite database at `data/links.db` on startup using Node's experimental `node:sqlite` module. Two tables: `categories` and `links` (FK: `links.category_id → categories.id`). Deleting a category manually deletes its links (no `ON DELETE CASCADE` — handled in `src/pages/api/categories/[id].ts`).
+`src/lib/db.ts` acts as a dynamic database adapter. By default, it initializes **Drizzle ORM** connecting to a PostgreSQL database (if `DATABASE_URL` is set in the environment). If no URL is provided, it falls back to a local SQLite database using Node's experimental `node:sqlite` module. The schema is defined in `src/lib/schema.ts` and includes four main tables: `panels`, `categories`, `links`, and `backups`. Relationships use `ON DELETE CASCADE` appropriately.
 
 ### API routes (`src/pages/api/`)
 
@@ -49,4 +49,5 @@ The project uses the **AHA! Stack** (Astro, HTMX, Alpine.js):
 - **HTMX**: Handles client-server interactions, fetching HTML fragments (`hx-get`, `hx-post`) instead of JSON.
 - **Alpine.js**: Manages lightweight client-side state (modals, theme toggling) in `src/pages/index.astro`.
 - **Sortable.js**: Provides drag-and-drop reordering functionality.
-No heavy client-side framework or virtual DOM is used. The server is the source of truth for rendering.
+
+The UI features a **sidebar navigation** for panels and a **CSS multi-column masonry layout** for displaying category cards on the dashboard. No heavy client-side framework or virtual DOM is used. The server is the source of truth for rendering.

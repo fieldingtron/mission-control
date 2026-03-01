@@ -501,6 +501,7 @@ const data = categories.map((c) => ({
       modalOpen: false,
       modalTitle: '',
       clockText: '',
+      searchQuery: '',
       currentPanel: '${currentPanelId}',
       sidebarCollapsed: localStorage.sidebarCollapsed === 'true',
       theme: localStorage.theme || 'system',
@@ -664,8 +665,8 @@ const data = categories.map((c) => ({
     <input
       type="hidden"
       id="active-panel-id"
-      name="panelId"
-      :value="currentPanel"
+      name="panel"
+      value={currentPanelId}
     />
 
     <!-- Modal Overlay -->
@@ -788,13 +789,8 @@ const data = categories.map((c) => ({
               <input
                 type="search"
                 name="q"
+                x-model="searchQuery"
                 placeholder="Search resources..."
-                hx-get="/api/fragments/grid"
-                hx-include="#active-panel-id"
-                hx-trigger="keyup changed delay:300ms, search"
-                hx-target="#grid"
-                hx-swap="outerHTML"
-                hx-push-url="false"
                 autocomplete="off"
                 style="text-transform: none; font-weight: 400;"
               />

@@ -18,6 +18,7 @@ const selectedCatId = link
   : catId
     ? parseInt(catId)
     : categories[0]?.id;
+const triggerEvents = `change, keyup delay:1s, paste delay:1s, keydown[key=='Enter']${link && link.url && !link.description ? ", load delay:100ms" : ""}`;
 ---
 
 <form
@@ -49,7 +50,7 @@ const selectedCatId = link
       value={link?.url || ""}
       placeholder="https://…"
       hx-post="/api/links/metadata"
-      hx-trigger="change, keyup delay:1s, paste delay:1s, keydown[key=='Enter']"
+      hx-trigger={triggerEvents}
       hx-target="#name-wrapper"
       hx-include="#modal-form"
       hx-swap="innerHTML"

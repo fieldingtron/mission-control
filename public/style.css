@@ -7,54 +7,56 @@
 }
 
 :root {
-  --bg: #f8fafc;
-  --surface: #ffffff;
+  --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+  --surface: rgba(255, 255, 255, 0.4);
   --border: #e2e8f0;
   --text: #0f172a;
   --muted: #64748b;
   --accent: #3b82f6;
   --accent-hover: #2563eb;
   --surface-hover: #f1f5f9;
-  --radius: 12px;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --danger-hover-bg: #fef2f2;
-  --search-input-bg: var(--bg);
+  --radius: 24px;
+  --shadow-sm: 0 4px 16px 0 rgb(0 0 0 / 0.1);
+  --shadow: 0 8px 32px 0 rgb(0 0 0 / 0.15);
+  --danger-hover-bg: rgba(254, 242, 242, 0.7);
+  --search-input-bg: rgba(255, 255, 255, 0.4);
 }
 
 [data-theme="dark"] {
-  --bg: #0f172a;
-  --surface: #1e293b;
+  --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+  --surface: rgba(30, 41, 59, 0.4);
   --border: #334155;
   --text: #f1f5f9;
   --muted: #94a3b8;
   --accent: #3b82f6;
   --surface-hover: #334155;
-  --danger-hover-bg: #450a0a;
-  --search-input-bg: var(--surface);
+  --radius: 24px;
+  --danger-hover-bg: rgba(69, 10, 10, 0.7);
+  --search-input-bg: rgba(30, 41, 59, 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f172a;
-    --surface: #1e293b;
+    --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    --surface: rgba(30, 41, 59, 0.4);
     --border: #334155;
     --text: #f1f5f9;
     --muted: #94a3b8;
     --accent: #3b82f6;
     --surface-hover: #334155;
-    --danger-hover-bg: #450a0a;
-    --search-input-bg: var(--surface);
+    --danger-hover-bg: rgba(69, 10, 10, 0.7);
+    --search-input-bg: rgba(30, 41, 59, 0.4);
   }
 }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
   display: flex;
-  transition: background-color 0.2s, color 0.2s;
+  transition: color 0.2s;
   letter-spacing: -0.011em;
 }
 
@@ -95,7 +97,9 @@ body {
 .sidebar {
   width: 260px;
   background: var(--surface);
-  border-right: 1px solid var(--border);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
@@ -257,7 +261,9 @@ body {
 /* ── Top Bar ─────────────────────────────────────────────── */
 .top-bar {
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding: 12px 32px;
   display: flex;
   align-items: center;
@@ -561,7 +567,9 @@ body {
 
 .search-box {
   background: var(--surface);
-  border: 1px solid var(--border);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   height: 32px;
   padding: 0 10px;
   display: flex;
@@ -643,8 +651,10 @@ header h1 {
 .search-box input {
   width: 100%;
   background: var(--search-input-bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
   padding: 6px 10px 6px 28px;
   font-size: 13px;
   color: var(--text);
@@ -693,7 +703,9 @@ header h1 {
 /* ── Cards ───────────────────────────────────────────────── */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -713,8 +725,8 @@ header h1 {
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .card-title {
@@ -742,9 +754,11 @@ header h1 {
   right: 0;
   top: 100%;
   background-color: var(--surface);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   min-width: 120px;
   box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   z-index: 20;
   margin-top: 4px;
@@ -934,7 +948,10 @@ header h1 {
 
 .modal {
   background: var(--surface);
-  border-radius: 16px;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
   padding: 32px;
   width: 100%;
   max-width: 440px;

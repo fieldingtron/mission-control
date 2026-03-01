@@ -1,5 +1,16 @@
+---
+import db, { type Panel } from "../../../lib/db";
+
+const id = Astro.url.searchParams.get("id");
+let panel: Panel | null = null;
+
+if (id) {
+    panel = await db.getPanel(id);
+}
+---
+
 <form
-    hx-post="/api/panels"
+    hx-post={panel ? `/api/panels/${panel.id}` : "/api/panels"}
     hx-target="body"
     hx-swap="none"
     @submit="modalOpen = false"
@@ -11,6 +22,7 @@
             id="panel-name"
             name="name"
             placeholder="e.g. Projects..."
+            value={panel?.name || ""}
             required
             autofocus
         />

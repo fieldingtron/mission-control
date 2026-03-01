@@ -250,6 +250,19 @@ export class SupabaseAdapter implements DatabaseAdapter {
             const { error } = await this.sb.from('links').insert(snapshot.links);
             if (error) throw error;
         }
+
+        // Trigger sequence reset via RPC
+        await this.syncSequences();
+    }
+
+    async syncSequences(): Promise<void> {
+        // Calling our custom RPC function to align the primary key sequences with the max IDs
+        const { error } = await this.sb.rpc('sync_sequences');
+        if (error) {
+            console.error('[DB] Failed to sync sequences after restore/import. Ensure you have run supabase_sync_sequences.sql in the Supabase Dashboard:', error);
+        } else {
+            console.log('[DB] Sequences synchronized successfully.');
+        }
     }
 
     async getFullSnapshot(): Promise<Snapshot> {

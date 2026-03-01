@@ -118,6 +118,11 @@ export const POST: APIRoute = async ({ request }) => {
             }
         }
 
+        // Align the database sequences if using Supabase + Postgres
+        if (db.syncSequences) {
+            await db.syncSequences();
+        }
+
         // Refresh UI
         return new Response(null, {
             status: 200,

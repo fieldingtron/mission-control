@@ -2,15 +2,14 @@ import { DatabaseSync } from 'node:sqlite';
 import { existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SupabaseAdapter } from './supabase-adapter';
+import { DrizzleAdapter } from './drizzle-adapter';
 import dotenv from 'dotenv';
 
 // Force load the .env file if we are in a bare Node context 
 const configPath = join(dirname(fileURLToPath(import.meta.url)), '../../.env');
 dotenv.config({ path: configPath });
 
-const SUPABASE_URL = process.env.SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+const DATABASE_URL = process.env.DATABASE_URL || '';
 
 // ──────────────────────────────────────────────────────
 //  Types
@@ -101,6 +100,9 @@ export interface DatabaseAdapter {
 
   // Snapshot (for sync engine)
   getFullSnapshot(): Promise<Snapshot>;
+
+  // Utility
+  syncSequences?(): Promise<void>;
 }
 
 // ──────────────────────────────────────────────────────
@@ -370,14 +372,14 @@ export class SqliteAdapter implements DatabaseAdapter {
 let activeAdapter: DatabaseAdapter;
 
 export function initializeAdapter(): void {
-  console.log(`[DB] Initializing adapter: supabase`);
+  console.log(`[DB] Initializing adapter: drizzle`);
 
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.error('[DB] CRITICAL ERROR: SUPABASE_URL and SUPABASE_ANON_KEY must be set in the environment.');
-    // We instantiate it anyway with dummy values to prevent crashing, but it will fail queries
-    activeAdapter = new SupabaseAdapter('https://dummy.supabase.co', 'dummy');
+  if (!DATABASE_URL) {
+    console.error('[DB] CRITICAL ERROR: DATABASE_URL must be set in the environment.');
+    // Keep a dummy adapter initialization to prevent crash before user provides config
+    activeAdapter = new SqliteAdapter();
   } else {
-    activeAdapter = new SupabaseAdapter(SUPABASE_URL, SUPABASE_ANON_KEY);
+    activeAdapter = new DrizzleAdapter(DATABASE_URL);
   }
 
   // Initialization hook for remote adapters if needed

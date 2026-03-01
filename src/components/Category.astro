@@ -4,9 +4,11 @@ const { category } = Astro.props;
 ---
 
 <div
-  class="card"
+  class="card category"
   id={`cat-${category.id}`}
   data-id={category.id}
+  data-catname={category.name.toLowerCase()}
+  x-show="!searchQuery || $el.dataset.catname.includes(searchQuery.toLowerCase()) || Array.from($el.querySelectorAll('.link-row')).some(l => (l.dataset.search || '').includes(searchQuery.toLowerCase()))"
   draggable="true"
   @dragstart={`event.dataTransfer.setData('categoryId', '${category.id}')`}
 >
