@@ -44,6 +44,15 @@ const data = categories.map((c) => ({
     />
     <link rel="stylesheet" href="/style.css" />
     <script is:inline src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script is:inline>
+      // Configure HTMX to always send cookies with requests so our Session Middleware can authenticate them
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.addEventListener("htmx:configRequest", (event) => {
+          event.detail.target.credentials = true;
+          event.detail.withCredentials = true;
+        });
+      });
+    </script>
     <script
       is:inline
       src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"
@@ -551,7 +560,7 @@ const data = categories.map((c) => ({
       reloadSidebar() {
         const activePanelEl = document.getElementById('active-panel-id');
         const panelToFetch = activePanelEl ? activePanelEl.value : this.currentPanel;
-        htmx.ajax('GET', '/api/fragments/sidebar-nav?panelId=' + panelToFetch + '&_t=' + Date.now(), {target: '#sidebar-nav-container', swap: 'outerHTML', pushUrl: false});
+        htmx.ajax('GET', '/api/fragments/sidebar-nav?panelId=' + panelToFetch + '&_t=' + Date.now(), {target: '#sidebar-nav-container', swap: 'innerHTML', pushUrl: false});
       },
       playMoveSound() {
         if (window.playMoveSound) window.playMoveSound();
@@ -712,7 +721,7 @@ const data = categories.map((c) => ({
           <div
             hx-get={`/api/fragments/sidebar-nav?panelId=${currentPanelId}`}
             hx-trigger="load"
-            hx-swap="outerHTML"
+            hx-swap="innerHTML"
           >
           </div>
         </div>

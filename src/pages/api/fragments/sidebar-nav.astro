@@ -4,6 +4,7 @@ import db from "../../../lib/db";
 export const partial = true;
 
 const panels = await db.getPanels();
+console.log(`[DEBUG] sidebar-nav rendered with ${panels.length} panels.`);
 
 const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
 ---
@@ -41,26 +42,12 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
           hx-swap="outerHTML"
           hx-push-url={`/?panel=${panel.id}`}
           @click={`currentPanel = '${panel.id}'`}
-          x-show="!sidebarCollapsed"
         >
           {panel.name}
         </a>
-        <a
-          class={`sidebar-tab sidebar-tab-icon ${String(panel.id) === currentPanelId ? "active" : ""}`}
-          href={`/?panel=${panel.id}`}
-          hx-get={`/api/fragments/grid?panel=${panel.id}`}
-          hx-target="#grid"
-          hx-swap="outerHTML"
-          hx-push-url={`/?panel=${panel.id}`}
-          @click={`currentPanel = '${panel.id}'`}
-          x-show="sidebarCollapsed"
-          title={panel.name}
-        >
-          {panel.name.charAt(0)}
-        </a>
+
         <button
           class="panel-delete-btn"
-          x-show="!sidebarCollapsed"
           @click={`modalOpen = true; modalTitle = 'Delete Panel'`}
           hx-get={`/api/fragments/delete-confirm-modal?type=panel&id=${panel.id}&name=${encodeURIComponent(panel.name)}`}
           hx-target="#modal-content"
@@ -142,7 +129,6 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
     hx-get="/api/fragments/panel-modal"
     hx-target="#modal-content"
     hx-swap="innerHTML"
-    x-show="!sidebarCollapsed"
   >
     <svg
       width="14"
@@ -155,25 +141,5 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
       <path d="M12 5v14M5 12h14"></path>
     </svg>
     Add Panel
-  </button>
-  <button
-    class="sidebar-add-btn sidebar-tab-icon"
-    @click={`modalOpen = true; modalTitle = 'New Panel'`}
-    hx-get="/api/fragments/panel-modal"
-    hx-target="#modal-content"
-    hx-swap="innerHTML"
-    x-show="sidebarCollapsed"
-    title="Add Panel"
-  >
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-    >
-      <path d="M12 5v14M5 12h14"></path>
-    </svg>
   </button>
 </nav>
