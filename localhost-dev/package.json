@@ -1,0 +1,16 @@
+{
+  "name": "localhost-dev",
+  "version": "1.0.0",
+  "description": "Expose any local dev server at <name>.localhost with Caddy reverse proxy",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "localhost-dev": "./bin/localhost-dev.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

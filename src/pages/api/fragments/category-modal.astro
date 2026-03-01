@@ -1,0 +1,42 @@
+---
+import db from "../../../lib/db";
+import type { Category } from "../../../lib/db";
+export const partial = true;
+
+const id = Astro.url.searchParams.get("id");
+const panelId = Astro.url.searchParams.get("panelId");
+let category: Category | null = null;
+if (id) {
+  category = await db.getCategory(id);
+}
+---
+
+<form
+  id="modal-form"
+  hx-post={category ? `/api/categories/${category.id}` : "/api/categories"}
+  hx-swap="none"
+  @htmx:after-request="modalOpen = false"
+  autocomplete="off"
+>
+  {panelId && <input type="hidden" name="panel_id" value={panelId} />}
+
+  <div class="field">
+    <label for="f-name">Name</label>
+    <input
+      id="f-name"
+      type="text"
+      name="name"
+      value={category?.name || ""}
+      placeholder="e.g. Work, Reading…"
+      required
+      autofocus
+    />
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-ghost" @click="modalOpen = false"
+      >Cancel</button
+    >
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>

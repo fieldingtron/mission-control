@@ -1,0 +1,83 @@
+---
+import db from "../../../lib/db";
+import Category from "../../../components/Category.astro";
+
+export const partial = true;
+
+const query = Astro.url.searchParams.get("q")?.toLowerCase() || "";
+const panelId = Astro.url.searchParams.get("panel");
+
+if (panelId === "settings" && !query) {
+  return Astro.redirect("/api/fragments/settings");
+}
+
+const panelIdForQuery = panelId && panelId !== "settings" ? panelId : null;
+let categories = await db.getCategories(panelIdForQuery);
+let links = await db.getLinks();
+
+if (query) {
+  // Filter links that match the query
+  const filteredLinks = links.filter(
+    (l) =>
+      l.name.toLowerCase().includes(query) ||
+      (l.description && l.description.toLowerCase().includes(query)) ||
+      l.url.toLowerCase().includes(query),
+  );
+
+  // Find categories that either match the query themselves OR contain matching links
+  categories = categories.filter(
+    (c) =>
+      c.name.toLowerCase().includes(query) ||
+      filteredLinks.some((l) => l.category_id === c.id),
+  );
+
+  // Update links to only show those that match or belong to matching categories
+  links = filteredLinks;
+}
+
+const data = categories.map((c) => ({
+  ...c,
+  links: links.filter((l) => l.category_id === c.id),
+}));
+---
+
+<main
+  id="grid"
+  x-data
+  x-init={`
+  Sortable.create($el, {
+    animation: 150,
+    handle: '.drag-handle-cat',
+    onEnd: async () => {
+      const ids = Array.from($el.children).map(el => el.getAttribute('data-id')).filter(id => id);
+      if (window.playMoveSound) window.playMoveSound();
+      await fetch('/api/categories/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids })
+      });
+      if (window.dashboardBc) window.dashboardBc.postMessage({ type: 'refresh' });
+    }
+  });
+`}
+>
+  {
+    data.length > 0 ? (
+      data.map((cat) => <Category category={cat} />)
+    ) : (
+      <div class="empty-page">
+        {query ? (
+          <p>
+            No results found for "<strong>{query}</strong>"
+          </p>
+        ) : (
+          <p>
+            No categories yet.
+            <br />
+            Click <strong>+ Category</strong> to get started.
+          </p>
+        )}
+      </div>
+    )
+  }
+</main>

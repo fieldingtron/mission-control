@@ -1,0 +1,31 @@
+---
+
+---
+
+<form
+    hx-post="/api/bookmarks/import"
+    hx-encoding="multipart/form-data"
+    class="import-form"
+>
+    <div class="field">
+        <label>SELECT BOOKMARKS FILE (HTML)</label>
+        <input type="file" name="bookmarks" accept=".html" required />
+    </div>
+
+    <div class="field" style="margin-top: 16px;">
+        <label>OR PASTE URLS (ONE PER LINE)</label>
+        <textarea
+            name="urls"
+            rows="5"
+            placeholder="https://example.com"
+            style="width: 100%; font-family: inherit; font-size: 11px; padding: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);"
+        ></textarea>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" @click="modalOpen = false"
+            >CANCEL</button
+        >
+        <button type="submit" class="btn btn-primary">IMPORT</button>
+    </div>
+</form>

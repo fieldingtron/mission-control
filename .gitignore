@@ -1,0 +1,16 @@
+node_modules/
+dist/
+data/
+.env
+
+# Astro
+.astro/
+
+# IDEs
+.vscode/
+.claude/
+.gemini/
+
+# Databases
+*.db
+*.sqlite

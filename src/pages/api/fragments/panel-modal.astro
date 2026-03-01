@@ -1,0 +1,25 @@
+<form
+    hx-post="/api/panels"
+    hx-target="body"
+    hx-swap="none"
+    @submit="modalOpen = false"
+>
+    <div class="field">
+        <label for="panel-name">Name</label>
+        <input
+            type="text"
+            id="panel-name"
+            name="name"
+            placeholder="e.g. Projects..."
+            required
+            autofocus
+        />
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" @click="modalOpen = false"
+            >Cancel</button
+        >
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>

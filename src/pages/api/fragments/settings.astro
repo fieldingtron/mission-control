@@ -1,0 +1,702 @@
+---
+import db from "../../../lib/db";
+import { getDbConfig } from "../../../lib/db-config";
+export const partial = true;
+
+const dbConfig = getDbConfig();
+
+const panels = await db.getPanelsWithCounts();
+const categories = await db.getCategoriesWithPanel();
+const backups = await db.getBackups(10);
+---
+
+<main id="grid" class="settings-root">
+    <div class="settings-layout col-3">
+        <!-- ── COLUMN 1: Appearance & Quotes ────────────────── -->
+        <div class="s-col">
+            <!-- Appearance -->
+            <div class="s-card">
+                <div class="s-head">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        ><circle cx="12" cy="12" r="4"></circle><path
+                            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+                        ></path></svg
+                    >
+                    <h3>Appearance</h3>
+                </div>
+                <div class="s-theme-row">
+                    <button
+                        class="s-theme-tile"
+                        @click="setTheme('light')"
+                        :class="{ active: theme === 'light' }"
+                    >
+                        <div class="s-theme-swatch" style="background:#ffffff;">
+                        </div>
+                        <span>Light</span>
+                    </button>
+                    <button
+                        class="s-theme-tile"
+                        @click="setTheme('dark')"
+                        :class="{ active: theme === 'dark' }"
+                    >
+                        <div class="s-theme-swatch" style="background:#0f172a;">
+                        </div>
+                        <span>Dark</span>
+                    </button>
+                    <button
+                        class="s-theme-tile"
+                        @click="setTheme('system')"
+                        :class="{ active: theme === 'system' }"
+                    >
+                        <div
+                            class="s-theme-swatch"
+                            style="background:linear-gradient(135deg,#fff 50%,#0f172a 50%);"
+                        >
+                        </div>
+                        <span>System</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quote Display -->
+            <div class="s-card">
+                <div class="s-head">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        ><path
+                            d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"
+                        ></path><path
+                            d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"
+                        ></path></svg
+                    >
+                    <h3>Quote Display</h3>
+                </div>
+                <p class="s-desc">
+                    Quotes rotate on page load and every 30 minutes.
+                </p>
+
+                <div class="s-sub-label">Collection</div>
+                <div class="s-pack-list">
+                    <button
+                        class="s-pack-item"
+                        @click="setQuotePack('founders')"
+                        :class="{ active: quotePack === 'founders' }"
+                    >
+                        <span class="s-pack-icon">🇺🇸</span>
+                        <div class="s-pack-body">
+                            <div class="s-pack-name">American Founders</div>
+                            <div class="s-pack-sub">
+                                Washington, Jefferson, Franklin &amp; more
+                            </div>
+                        </div>
+                        <div
+                            class="s-check-dot"
+                            x-show="quotePack === 'founders'"
+                            style="display:none;"
+                        >
+                        </div>
+                    </button>
+                    <button
+                        class="s-pack-item"
+                        @click="setQuotePack('rumi')"
+                        :class="{ active: quotePack === 'rumi' }"
+                    >
+                        <span class="s-pack-icon">🌙</span>
+                        <div class="s-pack-body">
+                            <div class="s-pack-name">Rumi</div>
+                            <div class="s-pack-sub">
+                                Mystical poems &amp; proverbs
+                            </div>
+                        </div>
+                        <div
+                            class="s-check-dot"
+                            x-show="quotePack === 'rumi'"
+                            style="display:none;"
+                        >
+                        </div>
+                    </button>
+                </div>
+
+                <div class="s-sub-label" style="margin-top:20px;">Position</div>
+                <div class="s-pos-row">
+                    <button
+                        class="s-pos-btn"
+                        @click="setQuotePosition('top')"
+                        :class="{ active: quotePosition === 'top' }"
+                    >
+                        <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            ><polyline points="17 11 12 6 7 11"></polyline><line
+                                x1="12"
+                                y1="18"
+                                x2="12"
+                                y2="6"></line></svg
+                        >
+                        Top
+                    </button>
+                    <button
+                        class="s-pos-btn"
+                        @click="setQuotePosition('bottom')"
+                        :class="{ active: quotePosition === 'bottom' }"
+                    >
+                        <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            ><polyline points="7 13 12 18 17 13"
+                            ></polyline><line x1="12" y1="6" x2="12" y2="18"
+                            ></line></svg
+                        >
+                        Bottom
+                    </button>
+                </div>
+            </div>
+
+            <!-- Import Bookmarks -->
+            <div class="s-card s-card-slim">
+                <div class="s-about-row">
+                    <span
+                        class="s-about-emoji"
+                        style="padding: 6px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; color: var(--accent);"
+                    >
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
+                            ></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </span>
+                    <div style="flex:1;">
+                        <span class="s-about-name">Import Data</span>
+                        <span class="s-about-tagline"
+                            >Upload Netscape HTML Bookmarks</span
+                        >
+                    </div>
+                    <button
+                        class="s-primary-btn"
+                        style="width:auto; padding: 6px 12px; font-size: 13px;"
+                        @click="modalOpen = true; modalTitle = 'Import Bookmarks'"
+                        hx-get="/api/fragments/import-modal"
+                        hx-target="#modal-content"
+                        hx-swap="innerHTML"
+                    >
+                        Import
+                    </button>
+                </div>
+            </div>
+
+            <!-- Storage Settings -->
+            <div class="s-card">
+                <div class="s-head">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                        ></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <h3>Storage Provider</h3>
+                </div>
+                <p class="s-desc">
+                    Choose where your dashboard data is saved. Switching
+                    providers requires migrating your data.
+                </p>
+
+                <form
+                    class="s-storage-form"
+                    hx-post="/api/db/config"
+                    hx-swap="none"
+                    x-data={`{ provider: '${dbConfig.provider}' }`}
+                >
+                    <div class="field">
+                        <label>Provider</label>
+                        <select
+                            name="provider"
+                            x-model="provider"
+                            @change="$el.form.dispatchEvent(new Event('submit', { cancelable: true }))"
+                        >
+                            <option value="sqlite">Local SQLite (Native)</option
+                            >
+                            <option value="turso">Turso (libSQL)</option>
+                            <option value="supabase"
+                                >Supabase (PostgreSQL)</option
+                            >
+                        </select>
+                    </div>
+
+                    <!-- Turso Fields -->
+                    <div
+                        x-show="provider === 'turso'"
+                        style="display: none; margin-top: 10px;"
+                    >
+                        <div class="field">
+                            <label>Database URL</label>
+                            <input
+                                type="text"
+                                name="tursoUrl"
+                                value={dbConfig.tursoUrl || ""}
+                                placeholder="libsql://..."
+                            />
+                        </div>
+                        <div class="field">
+                            <label>Auth Token</label>
+                            <input
+                                type="password"
+                                name="tursoToken"
+                                value={dbConfig.tursoToken || ""}
+                                placeholder="ey..."
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Supabase Fields -->
+                    <div
+                        x-show="provider === 'supabase'"
+                        style="display: none; margin-top: 10px;"
+                    >
+                        <div class="field">
+                            <label>Project URL</label>
+                            <input
+                                type="text"
+                                name="supabaseUrl"
+                                value={dbConfig.supabaseUrl || ""}
+                                placeholder="https://..."
+                            />
+                        </div>
+                        <div class="field">
+                            <label>Anon Key</label>
+                            <input
+                                type="password"
+                                name="supabaseAnonKey"
+                                value={dbConfig.supabaseAnonKey || ""}
+                                placeholder="ey..."
+                            />
+                        </div>
+                    </div>
+
+                    <div
+                        x-show="provider !== 'sqlite'"
+                        style="display: none; margin-top: 15px;"
+                    >
+                        <button
+                            type="submit"
+                            class="s-primary-btn"
+                            style="width: 100%;">Save Connection</button
+                        >
+                    </div>
+                </form>
+
+                <div
+                    style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);"
+                >
+                    <div class="s-sub-label">Data Migration</div>
+                    <p class="s-desc" style="margin-bottom: 10px;">
+                        Sync current data to the active provider (Wipe &
+                        Replace).
+                    </p>
+                    <button
+                        class="btn btn-ghost"
+                        style="width: 100%; font-size: 13px; color: var(--accent); border: 1px solid var(--accent-alpha);"
+                        hx-post="/api/db/sync"
+                        hx-target="#sync-result"
+                        hx-swap="outerHTML"
+                        hx-confirm="This will overwrite all data on the remote provider with your current local data. Are you sure?"
+                    >
+                        Migrate Data Now
+                    </button>
+                    <div id="sync-result"></div>
+                </div>
+            </div>
+
+            <!-- About -->
+            <div class="s-card s-card-slim">
+                <div class="s-about-row">
+                    <span class="s-about-emoji">🚀</span>
+                    <div>
+                        <span class="s-about-name">Mission Control</span>
+                        <span class="s-about-ver">v1.0.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── COLUMN 2: Backups & Categories ──────────────── -->
+        <div class="s-col">
+            <!-- Backups -->
+            <div class="s-card">
+                <div class="s-head">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        ><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
+                        ></path><polyline points="17 8 12 3 7 8"
+                        ></polyline><line x1="12" y1="3" x2="12" y2="15"
+                        ></line></svg
+                    >
+                    <h3>Backups</h3>
+                    <span class="s-chip">Last 10</span>
+                </div>
+                <button
+                    class="s-primary-btn"
+                    hx-post="/api/backups"
+                    hx-target="#backup-list"
+                    hx-swap="outerHTML"
+                >
+                    <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        ><path d="M12 5v14M5 12h14"></path></svg
+                    >
+                    Create Snapshot Now
+                </button>
+                <div
+                    id="backup-list"
+                    class="s-item-list"
+                    style="max-height: 250px;"
+                >
+                    {
+                        backups.length === 0 ? (
+                            <div class="s-empty">
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                >
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                No backups yet
+                            </div>
+                        ) : (
+                            backups.map((b) => (
+                                <div class="s-item" id={`backup-${b.id}`}>
+                                    <div class="s-item-body">
+                                        <span class="s-item-label">
+                                            {b.label}
+                                        </span>
+                                    </div>
+                                    <div class="s-item-actions">
+                                        <button
+                                            class="s-action-btn"
+                                            onclick={`if(confirm('Restore this backup? Current data will be replaced.')) { 
+                                            fetch('/api/backups/${b.id}/restore', { method: 'POST' })
+                                                .then(() => { 
+                                                    document.body.dispatchEvent(new Event('refresh'));
+                                                    document.body.dispatchEvent(new Event('refreshSidebar'));
+                                                });
+                                        }`}
+                                        >
+                                            <svg
+                                                width="11"
+                                                height="11"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                            >
+                                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                                <path d="M3 3v5h5" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            class="s-action-btn s-danger"
+                                            hx-delete={`/api/backups/${b.id}`}
+                                            hx-target={`#backup-${b.id}`}
+                                            hx-swap="outerHTML"
+                                            hx-confirm="Delete this backup?"
+                                        >
+                                            <svg
+                                                width="11"
+                                                height="11"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                            >
+                                                <path d="M18 6L6 18M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )
+                    }
+                </div>
+            </div>
+
+            <!-- Category Management -->
+            <div class="s-card" style="flex:1;">
+                <div class="s-head">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        ><rect x="3" y="3" width="7" height="7" rx="1"
+                        ></rect><rect x="14" y="3" width="7" height="7" rx="1"
+                        ></rect><rect x="3" y="14" width="7" height="7" rx="1"
+                        ></rect><rect x="14" y="14" width="7" height="7" rx="1"
+                        ></rect></svg
+                    >
+                    <h3>Categories</h3>
+                    <span class="s-chip">{categories.length} total</span>
+                </div>
+                <div class="s-item-list">
+                    {
+                        categories.length === 0 ? (
+                            <div class="s-empty">
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                >
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="7"
+                                        height="7"
+                                        rx="1"
+                                    />
+                                    <rect
+                                        x="14"
+                                        y="3"
+                                        width="7"
+                                        height="7"
+                                        rx="1"
+                                    />
+                                    <rect
+                                        x="3"
+                                        y="14"
+                                        width="7"
+                                        height="7"
+                                        rx="1"
+                                    />
+                                    <rect
+                                        x="14"
+                                        y="14"
+                                        width="7"
+                                        height="7"
+                                        rx="1"
+                                    />
+                                </svg>
+                                No categories yet
+                            </div>
+                        ) : (
+                            categories.map((cat) => (
+                                <div class="s-item">
+                                    <div class="s-item-body">
+                                        <span class="s-item-label">
+                                            {cat.name}
+                                        </span>
+                                        <span class="s-item-sub">
+                                            {cat.panel_name || "—"}
+                                        </span>
+                                    </div>
+                                    <div class="s-item-actions">
+                                        <button
+                                            class="s-action-btn"
+                                            hx-get={`/api/fragments/category-modal?id=${cat.id}`}
+                                            hx-target="#modal-content"
+                                            hx-swap="innerHTML"
+                                            @click="modalOpen = true; modalTitle = 'Edit Category'"
+                                            title="Edit"
+                                        >
+                                            <svg
+                                                width="11"
+                                                height="11"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                            >
+                                                <path d="M12 20h9" />
+                                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            class="s-action-btn s-danger"
+                                            hx-get={`/api/fragments/delete-confirm-modal?type=category&id=${cat.id}&name=${encodeURIComponent(cat.name)}`}
+                                            hx-target="#modal-content"
+                                            hx-swap="innerHTML"
+                                            @click.stop="modalOpen = true; modalTitle = 'Delete Category'"
+                                            title="Delete"
+                                        >
+                                            <svg
+                                                width="11"
+                                                height="11"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                            >
+                                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ── COLUMN 3: Panel Management ──────────────────── -->
+        <div class="s-col">
+            <div class="s-card" style="flex:1;">
+                <div class="s-head">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        ><rect x="3" y="3" width="18" height="18" rx="2" ry="2"
+                        ></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg
+                    >
+                    <h3>Panels</h3>
+                    <span class="s-chip">{panels.length} total</span>
+                </div>
+                <!-- Warning hint for panels -->
+                <p class="s-desc" style="color:#ef4444; opacity:0.8;">
+                    Deleting a panel deletes all its categories and links!
+                </p>
+
+                <div class="s-item-list">
+                    {
+                        panels.length === 0 ? (
+                            <div class="s-empty">
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                >
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="18"
+                                        height="18"
+                                        rx="2"
+                                        ry="2"
+                                    />
+                                    <line x1="9" y1="3" x2="9" y2="21" />
+                                </svg>
+                                No panels yet
+                            </div>
+                        ) : (
+                            panels.map((pan) => (
+                                <div class="s-item">
+                                    <div class="s-item-body">
+                                        <span class="s-item-label">
+                                            {pan.name}
+                                        </span>
+                                        <span class="s-item-sub">
+                                            {pan.category_count}{" "}
+                                            {pan.category_count === 1
+                                                ? "category"
+                                                : "categories"}
+                                        </span>
+                                    </div>
+                                    <div class="s-item-actions">
+                                        <button
+                                            class="s-action-btn"
+                                            hx-get={`/api/fragments/panel-modal?id=${pan.id}`}
+                                            hx-target="#modal-content"
+                                            hx-swap="innerHTML"
+                                            @click="modalOpen = true; modalTitle = 'Edit Panel'"
+                                            title="Edit"
+                                        >
+                                            <svg
+                                                width="11"
+                                                height="11"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                            >
+                                                <path d="M12 20h9" />
+                                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            class="s-action-btn s-danger"
+                                            hx-get={`/api/fragments/delete-confirm-modal?type=panel&id=${pan.id}&name=${encodeURIComponent(pan.name)}`}
+                                            hx-target="#modal-content"
+                                            hx-swap="innerHTML"
+                                            @click.stop="modalOpen = true; modalTitle = 'Delete Panel'"
+                                            title="Delete"
+                                        >
+                                            <svg
+                                                width="11"
+                                                height="11"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                            >
+                                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

@@ -1,0 +1,28 @@
+{
+  "name": "link-dashboard",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "localhost": "dashboard.localhost",
+  "scripts": {
+    "dev": "node ./localhost-dev/bin/localhost-dev.js npm run dev:astro",
+    "dev:astro": "NODE_OPTIONS=--experimental-sqlite astro dev",
+    "setup": "node install.js",
+    "build": "NODE_OPTIONS=--experimental-sqlite astro build",
+    "preview": "NODE_OPTIONS=--experimental-sqlite astro preview",
+    "test:db": "tsx src/scripts/verify-db.ts",
+    "test:adapter": "NODE_OPTIONS=--experimental-sqlite npx tsx src/tests/db-adapter.test.ts"
+  },
+  "dependencies": {
+    "@astrojs/alpinejs": "^0.4.9",
+    "@astrojs/node": "^9.0.0",
+    "@libsql/client": "^0.17.0",
+    "@supabase/supabase-js": "^2.98.0",
+    "alpinejs": "^3.15.8",
+    "astro": "^5.1.0",
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.1"
+  }
+}

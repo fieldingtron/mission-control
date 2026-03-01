@@ -1,0 +1,82 @@
+---
+import db from "../../../lib/db";
+export const partial = true;
+
+const backups = await db.getBackups(10);
+---
+
+<div class="backup-list" id="backup-list">
+    {
+        backups.length === 0 ? (
+            <p class="backup-empty">
+                No backups yet. Create your first backup above.
+            </p>
+        ) : (
+            backups.map((b) => (
+                <div class="backup-item" id={`backup-${b.id}`}>
+                    <div class="backup-meta">
+                        <span class="backup-label">{b.label}</span>
+                        <span class="backup-date">
+                            {new Date(b.created_at + "Z").toLocaleString(
+                                "en-US",
+                                {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                },
+                            )}
+                        </span>
+                    </div>
+                    <div class="backup-actions">
+                        <button
+                            class="btn-backup-action restore"
+                            onclick={`if(confirm('Restore this backup? Your current data will be replaced.')) { 
+                            fetch('/api/backups/${b.id}/restore', { method: 'POST' })
+                                .then(r => r.json())
+                                .then(() => { 
+                                    document.body.dispatchEvent(new Event('refresh'));
+                                    document.body.dispatchEvent(new Event('refreshSidebar'));
+                                    htmx.ajax('GET', '/api/fragments/backup-list', { target: '#backup-list', swap: 'outerHTML' });
+                                });
+                        }`}
+                            title="Restore this backup"
+                        >
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                            </svg>
+                            Restore
+                        </button>
+                        <button
+                            class="btn-backup-action delete"
+                            hx-delete={`/api/backups/${b.id}`}
+                            hx-target={`#backup-${b.id}`}
+                            hx-swap="outerHTML"
+                            hx-confirm="Delete this backup?"
+                            title="Delete backup"
+                        >
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            ))
+        )
+    }
+</div>

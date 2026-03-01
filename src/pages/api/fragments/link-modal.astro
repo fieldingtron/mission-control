@@ -1,0 +1,91 @@
+---
+import db from "../../../lib/db";
+import type { Link } from "../../../lib/db";
+
+export const partial = true;
+
+const id = Astro.url.searchParams.get("id");
+const catId = Astro.url.searchParams.get("catId");
+
+let link: Link | null = null;
+if (id) {
+  link = await db.getLink(id);
+}
+
+const categories = await db.getCategories();
+const selectedCatId = link
+  ? link.category_id
+  : catId
+    ? parseInt(catId)
+    : categories[0]?.id;
+---
+
+<form
+  id="modal-form"
+  hx-post={link ? `/api/links/${link.id}` : "/api/links"}
+  hx-swap="none"
+  @htmx:after-request="if (event.detail.target.id === 'modal-form') modalOpen = false"
+  autocomplete="off"
+>
+  <div class="field" id="name-wrapper">
+    <label for="f-name">Name</label>
+    <input
+      id="f-name"
+      type="text"
+      name="name"
+      value={link?.name || ""}
+      placeholder="e.g. GitHub"
+      required
+      autofocus
+    />
+  </div>
+
+  <div class="field">
+    <label for="f-url">URL</label>
+    <input
+      id="f-url"
+      type="text"
+      name="url"
+      value={link?.url || ""}
+      placeholder="https://…"
+      hx-post="/api/links/metadata"
+      hx-trigger="change, keyup delay:1s, paste delay:1s, keydown[key=='Enter']"
+      hx-target="#name-wrapper"
+      hx-include="#modal-form"
+      hx-swap="innerHTML"
+      @keydown.enter.prevent="htmx.trigger(this, 'change')"
+      required
+    />
+  </div>
+
+  <div class="field">
+    <label for="f-description">Description</label>
+    <input
+      id="f-description"
+      type="text"
+      name="description"
+      value={link?.description || ""}
+      placeholder="Short note…"
+    />
+  </div>
+
+  <div class="field">
+    <label for="f-cat">Category</label>
+    <select name="category_id" id="f-cat">
+      {
+        categories.map((c) => (
+          <option value={c.id} selected={c.id === selectedCatId}>
+            {c.name}
+          </option>
+        ))
+      }
+    </select>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-ghost" @click="modalOpen = false"
+      >Cancel</button
+    >
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>

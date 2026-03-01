@@ -1,0 +1,90 @@
+---
+export const partial = true;
+
+const type = Astro.url.searchParams.get("type");
+const id = Astro.url.searchParams.get("id");
+const name = Astro.url.searchParams.get("name");
+
+let deleteUrl = "";
+let target = "";
+let message = "";
+
+if (type === "panel") {
+    deleteUrl = `/api/panels/${id}`;
+    target = "body";
+    message = `Are you sure you want to delete the panel "${name}"? This will permanently remove all categories and links inside it.`;
+} else if (type === "category") {
+    deleteUrl = `/api/categories/${id}`;
+    target = `#cat-${id}`;
+    message = `Are you sure you want to delete the category "${name}"?`;
+} else if (type === "link") {
+    deleteUrl = `/api/links/${id}`;
+    target = `#link-${id}`;
+    message = `Are you sure you want to delete this link?`;
+}
+---
+
+<div class="delete-confirmation">
+    <p class="delete-message">{message}</p>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" @click="modalOpen = false">
+            Cancel
+        </button>
+
+        {
+            type === "panel" ? (
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click={`
+                    modalOpen = false;
+                    fetch('${deleteUrl}', { method: 'DELETE' }).then(() => {
+                        if (window.playMoveSound) window.playMoveSound();
+                        reloadSidebar();
+                        const firstPanel = document.querySelector('.sidebar-tab[href]');
+                        const firstId = firstPanel ? new URL(firstPanel.href).searchParams.get('panel') : '1';
+                        if (firstId && firstId !== '${id}') {
+                            currentPanel = firstId;
+                            history.replaceState(null, '', '/?panel=' + firstId);
+                        } else {
+                            currentPanel = '1';
+                            history.replaceState(null, '', '/?panel=1');
+                        }
+                        reloadGrid();
+                    });
+                `}
+                >
+                    Delete
+                </button>
+            ) : (
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    hx-delete={deleteUrl}
+                    hx-target={target}
+                    hx-swap="outerHTML"
+                    @click="if (window.playMoveSound) window.playMoveSound(); modalOpen = false"
+                >
+                    Delete
+                </button>
+            )
+        }
+    </div>
+</div>
+
+<style>
+    .delete-message {
+        font-size: 15px;
+        line-height: 1.5;
+        color: var(--text);
+        margin-bottom: 24px;
+    }
+    .btn-danger {
+        background: #ef4444;
+        color: white;
+    }
+    .btn-danger:hover {
+        background: #dc2626;
+    }
+</style>

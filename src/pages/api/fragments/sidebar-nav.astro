@@ -1,0 +1,179 @@
+---
+import db from "../../../lib/db";
+
+export const partial = true;
+
+const panels = await db.getPanels();
+
+const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
+---
+
+<nav
+  class="sidebar-nav"
+  id="sidebar-nav-container"
+  x-init={`
+        if (window.sidebarSortable) { window.sidebarSortable.destroy(); }
+        window.sidebarSortable = Sortable.create($el, {
+          animation: 150,
+          handle: '.sidebar-tab',
+          draggable: '.sidebar-tab-wrapper',
+          filter: '.panel-delete-btn',
+          onEnd: async (evt) => {
+            const ids = Array.from(evt.to.children).map(el => el.getAttribute('data-id')).filter(id => id);
+            await fetch('/api/panels/reorder', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ids })
+            });
+            if (window.dashboardBc) window.dashboardBc.postMessage({ type: 'refresh' });
+          }
+        });
+    `}
+>
+  {
+    panels.map((panel) => (
+      <div class="sidebar-tab-wrapper" data-id={panel.id}>
+        <a
+          class={`sidebar-tab ${String(panel.id) === currentPanelId ? "active" : ""}`}
+          href={`/?panel=${panel.id}`}
+          hx-get={`/api/fragments/grid?panel=${panel.id}`}
+          hx-target="#grid"
+          hx-swap="outerHTML"
+          hx-push-url={`/?panel=${panel.id}`}
+          @click={`currentPanel = '${panel.id}'`}
+          x-show="!sidebarCollapsed"
+        >
+          {panel.name}
+        </a>
+        <a
+          class={`sidebar-tab sidebar-tab-icon ${String(panel.id) === currentPanelId ? "active" : ""}`}
+          href={`/?panel=${panel.id}`}
+          hx-get={`/api/fragments/grid?panel=${panel.id}`}
+          hx-target="#grid"
+          hx-swap="outerHTML"
+          hx-push-url={`/?panel=${panel.id}`}
+          @click={`currentPanel = '${panel.id}'`}
+          x-show="sidebarCollapsed"
+          title={panel.name}
+        >
+          {panel.name.charAt(0)}
+        </a>
+        <button
+          class="panel-delete-btn"
+          x-show="!sidebarCollapsed"
+          @click={`modalOpen = true; modalTitle = 'Delete Panel'`}
+          hx-get={`/api/fragments/delete-confirm-modal?type=panel&id=${panel.id}&name=${encodeURIComponent(panel.name)}`}
+          hx-target="#modal-content"
+          hx-swap="innerHTML"
+          title="Delete panel"
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+    ))
+  }
+
+  <!-- Settings Tab -->
+  <a
+    class={`sidebar-tab settings-tab ${currentPanelId === "settings" ? "active" : ""}`}
+    href="/?panel=settings"
+    hx-get="/api/fragments/settings"
+    hx-target="#grid"
+    hx-swap="outerHTML"
+    hx-push-url="/?panel=settings"
+    @click="currentPanel = 'settings'"
+    x-show="!sidebarCollapsed"
+  >
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <circle cx="12" cy="12" r="3"></circle>
+      <path
+        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+      ></path>
+    </svg>
+    Settings
+  </a>
+  <a
+    class={`sidebar-tab sidebar-tab-icon settings-tab ${currentPanelId === "settings" ? "active" : ""}`}
+    href="/?panel=settings"
+    hx-get="/api/fragments/settings"
+    hx-target="#grid"
+    hx-swap="outerHTML"
+    hx-push-url="/?panel=settings"
+    @click="currentPanel = 'settings'"
+    x-show="sidebarCollapsed"
+    title="Settings"
+  >
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <circle cx="12" cy="12" r="3"></circle>
+      <path
+        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+      ></path>
+    </svg>
+  </a>
+
+  <!-- Add Panel Button -->
+  <button
+    class="sidebar-add-btn"
+    @click={`modalOpen = true; modalTitle = 'New Panel'`}
+    hx-get="/api/fragments/panel-modal"
+    hx-target="#modal-content"
+    hx-swap="innerHTML"
+    x-show="!sidebarCollapsed"
+  >
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path d="M12 5v14M5 12h14"></path>
+    </svg>
+    Add Panel
+  </button>
+  <button
+    class="sidebar-add-btn sidebar-tab-icon"
+    @click={`modalOpen = true; modalTitle = 'New Panel'`}
+    hx-get="/api/fragments/panel-modal"
+    hx-target="#modal-content"
+    hx-swap="innerHTML"
+    x-show="sidebarCollapsed"
+    title="Add Panel"
+  >
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path d="M12 5v14M5 12h14"></path>
+    </svg>
+  </button>
+</nav>

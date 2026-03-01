@@ -1,0 +1,900 @@
+---
+import db from "../lib/db";
+import Category from "../components/Category.astro";
+import Settings from "./api/fragments/settings.astro";
+import { QUOTE_PACKS, getQuoteForTime } from "../lib/quotes";
+// SSR: seed the initial quote with the Founders pack as fallback
+// Client-side Alpine.js will pick up the saved pack from localStorage
+const ssrQuote = getQuoteForTime("founders");
+
+const url = new URL(Astro.request.url);
+const currentPanelId = url.searchParams.get("panel") || "1";
+
+// Get all panels for navigation
+const panels = await db.getPanels();
+
+let categories: any[] = [];
+let links: any[] = [];
+
+if (currentPanelId !== "settings") {
+  // Initial data fetch for SSR
+  categories = (await db.getCategories(currentPanelId)) as any[];
+  links = (await db.getLinks()) as any[];
+}
+
+const data = categories.map((c) => ({
+  ...c,
+  links: links.filter((l) => l.category_id === c.id),
+}));
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Mission Control</title>
+    <!-- Modern Sans-Serif Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <script is:inline src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script
+      is:inline
+      src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <script is:inline>
+      // Theme initialization helper
+      if (localStorage.theme === "dark") {
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else if (localStorage.theme === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+      // If no theme in localStorage, we let the CSS prefers-color-scheme media query handle it.
+    </script>
+    <script is:inline>
+      // Embed quote packs directly to avoid define:vars serialization issues
+      window.QUOTE_PACKS = {
+        founders: {
+          name: "American Founders",
+          quotes: [
+            {
+              text: "The only way to be truly free is to make our own laws.",
+              author: "Benjamin Franklin",
+            },
+            {
+              text: "Give me liberty, or give me death!",
+              author: "Patrick Henry",
+            },
+            {
+              text: "We hold these truths to be self-evident, that all men are created equal.",
+              author: "Thomas Jefferson",
+            },
+            {
+              text: "The price of liberty is eternal vigilance.",
+              author: "Thomas Jefferson",
+            },
+            {
+              text: "In matters of style, swim with the current; in matters of principle, stand like a rock.",
+              author: "Thomas Jefferson",
+            },
+            {
+              text: "It is the soldier, not the reporter, who has given us freedom of the press.",
+              author: "George Washington",
+            },
+            {
+              text: "Associate yourself with men of good quality if you esteem your own reputation.",
+              author: "George Washington",
+            },
+            {
+              text: "Discipline is the soul of an army. It makes small numbers formidable.",
+              author: "George Washington",
+            },
+            {
+              text: "To be prepared for war is one of the most effective means of preserving peace.",
+              author: "George Washington",
+            },
+            {
+              text: "It is far better to be alone, than to be in bad company.",
+              author: "George Washington",
+            },
+            {
+              text: "An investment in knowledge pays the best interest.",
+              author: "Benjamin Franklin",
+            },
+            {
+              text: "Well done is better than well said.",
+              author: "Benjamin Franklin",
+            },
+            { text: "No gains without pains.", author: "Benjamin Franklin" },
+            {
+              text: "A penny saved is a penny earned.",
+              author: "Benjamin Franklin",
+            },
+            {
+              text: "Tell me and I forget, teach me and I may remember, involve me and I learn.",
+              author: "Benjamin Franklin",
+            },
+            {
+              text: "The advancement and diffusion of knowledge is the only guardian of true liberty.",
+              author: "James Madison",
+            },
+            {
+              text: "Knowledge will forever govern ignorance.",
+              author: "James Madison",
+            },
+            {
+              text: "If men were angels, no government would be necessary.",
+              author: "James Madison",
+            },
+            {
+              text: "The truth is that all men having power ought to be mistrusted.",
+              author: "James Madison",
+            },
+            {
+              text: "We have it in our power to begin the world over again.",
+              author: "Thomas Paine",
+            },
+            {
+              text: "The world is my country, all mankind are my brethren, and to do good is my religion.",
+              author: "Thomas Paine",
+            },
+            {
+              text: "Character is like a tree and reputation like a shadow.",
+              author: "Abraham Lincoln",
+            },
+            {
+              text: "Give me six hours to chop down a tree and I will spend the first four sharpening the axe.",
+              author: "Abraham Lincoln",
+            },
+            {
+              text: "Whatever you are, be a good one.",
+              author: "Abraham Lincoln",
+            },
+            {
+              text: "Nearly all men can stand adversity, but if you want to test a man's character, give him power.",
+              author: "Abraham Lincoln",
+            },
+            {
+              text: "Those who deny freedom to others deserve it not for themselves.",
+              author: "Abraham Lincoln",
+            },
+            {
+              text: "Facts are stubborn things; and whatever may be our wishes, they cannot alter the state of facts.",
+              author: "John Adams",
+            },
+            {
+              text: "The happiness of society is the end of government.",
+              author: "John Adams",
+            },
+            {
+              text: "Liberty cannot be preserved without a general knowledge among the people.",
+              author: "John Adams",
+            },
+            {
+              text: "A republic, if you can keep it.",
+              author: "Benjamin Franklin",
+            },
+            {
+              text: "One man with courage is a majority.",
+              author: "Andrew Jackson",
+            },
+            {
+              text: "Take time to deliberate; but when the time for action arrives, stop thinking and go in.",
+              author: "Andrew Jackson",
+            },
+            {
+              text: "The battle, sir, is not to the strong alone; it is to the vigilant, the active, the brave.",
+              author: "Patrick Henry",
+            },
+            {
+              text: "Honesty is the first chapter in the book of wisdom.",
+              author: "Thomas Jefferson",
+            },
+            {
+              text: "The will of the people is the only legitimate foundation of any government.",
+              author: "Thomas Jefferson",
+            },
+            {
+              text: "Diligence is the mother of good luck.",
+              author: "Benjamin Franklin",
+            },
+            {
+              text: "Happiness depends more on the inward disposition of mind than on outward circumstances.",
+              author: "Benjamin Franklin",
+            },
+            {
+              text: "If you want something done right, do it yourself.",
+              author: "George Washington",
+            },
+            {
+              text: "Liberty is to the collective body what health is to every individual body.",
+              author: "Voltaire",
+            },
+            {
+              text: "Laws and institutions must go hand in hand with the progress of the human mind.",
+              author: "Thomas Jefferson",
+            },
+            // John Marshall Quotes
+            {
+              text: "To listen well is as powerful a means of communication and influence as to talk well.",
+              author: "John Marshall",
+            },
+            {
+              text: "The Constitution is either a superior paramount law, unchangeable by ordinary means, or it is on a level with ordinary legislative acts.",
+              author: "John Marshall",
+            },
+            {
+              text: "The peculiar circumstances of the moment may render a measure more or less wise, but cannot render it more or less constitutional.",
+              author: "John Marshall",
+            },
+            {
+              text: "An unlimited power to tax involves, necessarily, a power to destroy.",
+              author: "John Marshall",
+            },
+            {
+              text: "It is emphatically the province and duty of the judicial department to say what the law is.",
+              author: "John Marshall",
+            },
+            {
+              text: "The power to tax involves the power to destroy.",
+              author: "John Marshall",
+            },
+            {
+              text: "A constitution is framed for ages to come, and is designed to approach immortality as nearly as human institutions can approach it.",
+              author: "John Marshall",
+            },
+            {
+              text: "We must never forget that it is a constitution we are expounding.",
+              author: "John Marshall",
+            },
+            {
+              text: "The government of the Union, though limited in its powers, is supreme within its sphere of action.",
+              author: "John Marshall",
+            },
+            {
+              text: "Let the end be legitimate, let it be within the scope of the constitution, and all means which are appropriate, which are plainly adapted to that end... are constitutional.",
+              author: "John Marshall",
+            },
+            {
+              text: "Every man's house is his castle.",
+              author: "John Marshall",
+            },
+            {
+              text: "There is no such thing as a free lunch.",
+              author: "John Marshall",
+            },
+            {
+              text: "A law repugnant to the Constitution is void.",
+              author: "John Marshall",
+            },
+            {
+              text: "The people made the Constitution, and the people can unmake it.",
+              author: "John Marshall",
+            },
+            {
+              text: "The acme of judicial distinction means the ability to look a lawyer straight in the eyes for two hours and not to hear a damned word he says.",
+              author: "John Marshall",
+            },
+            {
+              text: "No man's life, liberty or property are safe while the Legislature is in session.",
+              author: "John Marshall",
+            },
+            {
+              text: "It is a constitution intended to endure for ages to come, and, consequently, to be adapted to the various crises of human affairs.",
+              author: "John Marshall",
+            },
+            {
+              text: "In America, the law is king. For as in absolute governments the King is law, so in free countries the law ought to be King.",
+              author: "John Marshall",
+            },
+            {
+              text: "If a law be in opposition to the constitution; if both the law and the constitution apply to a particular case... the court must determine which of these conflicting rules governs the case.",
+              author: "John Marshall",
+            },
+            {
+              text: "The very essence of civil liberty certainly consists in the right of every individual to claim the protection of the laws, whenever he receives an injury.",
+              author: "John Marshall",
+            },
+            {
+              text: "The judicial department comes home in its effects to every man's fireside: it passes on his property, his reputation, his life, his all.",
+              author: "John Marshall",
+            },
+            {
+              text: "A corporation is an artificial being, invisible, intangible, and existing only in contemplation of law.",
+              author: "John Marshall",
+            },
+            {
+              text: "Experience should teach us to be most on our guard to protect liberty when the government's purposes are beneficent.",
+              author: "John Marshall",
+            },
+            {
+              text: "To what quarter will you look for protection from an infringement on the Constitution, if you will not give the power to the judiciary?",
+              author: "John Marshall",
+            },
+            {
+              text: "The Constitution of the United States was made not merely for the generation that then existed, but for posterity.",
+              author: "John Marshall",
+            },
+          ],
+        },
+        rumi: {
+          name: "Rumi",
+          quotes: [
+            {
+              text: "Out beyond ideas of wrongdoing and rightdoing, there is a field. I'll meet you there.",
+              author: "Rumi",
+            },
+            {
+              text: "Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself.",
+              author: "Rumi",
+            },
+            {
+              text: "You were born with wings. Why prefer to crawl through life?",
+              author: "Rumi",
+            },
+            {
+              text: "The wound is the place where the Light enters you.",
+              author: "Rumi",
+            },
+            {
+              text: "Sell your cleverness and buy bewilderment.",
+              author: "Rumi",
+            },
+            {
+              text: "Do not be satisfied with the stories that come before you. Unfold your own myth.",
+              author: "Rumi",
+            },
+            {
+              text: "Let yourself be silently drawn by the strange pull of what you really love.",
+              author: "Rumi",
+            },
+            {
+              text: "Why do you stay in prison when the door is so wide open?",
+              author: "Rumi",
+            },
+            {
+              text: "The garden of the world has no limits, except in your mind.",
+              author: "Rumi",
+            },
+            {
+              text: "Raise your words, not voice. It is rain that grows flowers, not thunder.",
+              author: "Rumi",
+            },
+            {
+              text: "Silence is the language of God, all else is poor translation.",
+              author: "Rumi",
+            },
+            { text: "What you seek is seeking you.", author: "Rumi" },
+            {
+              text: "Let the beauty of what you love be what you do.",
+              author: "Rumi",
+            },
+            {
+              text: "When you do things from your soul, you feel a river moving in you, a joy.",
+              author: "Rumi",
+            },
+            {
+              text: "I am not this hair, I am not this skin, I am the soul that lives within.",
+              author: "Rumi",
+            },
+            {
+              text: "Your heart is the size of an ocean. Go find yourself in its hidden depths.",
+              author: "Rumi",
+            },
+            {
+              text: "You have to keep breaking your heart until it opens.",
+              author: "Rumi",
+            },
+            {
+              text: "If you are irritated by every rub, how will you get polished?",
+              author: "Rumi",
+            },
+            {
+              text: "Everything in the universe is within you. Ask all from yourself.",
+              author: "Rumi",
+            },
+            {
+              text: "Be grateful for whoever comes, because each has been sent as a guide from beyond.",
+              author: "Rumi",
+            },
+            { text: "Patience is the key to joy.", author: "Rumi" },
+            {
+              text: "Try not to resist the changes that come your way. Instead, let life live through you.",
+              author: "Rumi",
+            },
+            {
+              text: "Stop acting so small. You are the universe in ecstatic motion.",
+              author: "Rumi",
+            },
+            {
+              text: "Your task is not to seek for love, but merely to seek and find all the barriers within yourself.",
+              author: "Rumi",
+            },
+            {
+              text: "Wherever you are, and whatever you do, be in love.",
+              author: "Rumi",
+            },
+            {
+              text: "Only from the heart can you touch the sky.",
+              author: "Rumi",
+            },
+            {
+              text: "The art of knowing is knowing what to ignore.",
+              author: "Rumi",
+            },
+            {
+              text: "Gratitude is the wine for the soul. Go on. Get drunk.",
+              author: "Rumi",
+            },
+            {
+              text: "Yesterday is gone and its tale told. Today new seeds are growing.",
+              author: "Rumi",
+            },
+            {
+              text: "Forget safety. Live where you fear to live.",
+              author: "Rumi",
+            },
+            {
+              text: "There is a voice that doesn't use words. Listen.",
+              author: "Rumi",
+            },
+            {
+              text: "In silence there is eloquence. Stop weaving and see how the pattern improves.",
+              author: "Rumi",
+            },
+            {
+              text: "This human being is a guest house. Every morning a new arrival.",
+              author: "Rumi",
+            },
+            {
+              text: "Wherever you stand, be the soul of that place.",
+              author: "Rumi",
+            },
+            { text: "The cure for pain is in the pain.", author: "Rumi" },
+            { text: "Shine like the whole universe is yours.", author: "Rumi" },
+            {
+              text: "Sorrow prepares you for joy. It violently sweeps everything out of your house.",
+              author: "Rumi",
+            },
+            {
+              text: "Words are a pretext. It is the inner bond that draws one person to another.",
+              author: "Rumi",
+            },
+            {
+              text: "Be empty of worrying. Think of who created thought.",
+              author: "Rumi",
+            },
+            {
+              text: "The lion is most handsome when looking for food.",
+              author: "Rumi",
+            },
+            {
+              text: "When you feel a peaceful joy, that's when you are near truth.",
+              author: "Rumi",
+            },
+          ],
+        },
+      };
+    </script>
+  </head>
+  <body
+    x-data={`{
+      modalOpen: false,
+      modalTitle: '',
+      clockText: '',
+      currentPanel: '${currentPanelId}',
+      sidebarCollapsed: localStorage.sidebarCollapsed === 'true',
+      theme: localStorage.theme || 'system',
+      dragOverPanel: null,
+      quotePack: localStorage.quotePack || 'founders',
+      quotePosition: localStorage.quotePosition || 'bottom',
+      quoteText: (() => {
+        try {
+          const pack = (window.QUOTE_PACKS || {})[localStorage.quotePack || 'founders'] || (window.QUOTE_PACKS || {})['founders'];
+          if (!pack) return '';
+          return pack.quotes[Math.floor(Math.random() * pack.quotes.length)].text;
+        } catch(e) { return ''; }
+      })(),
+      quoteAuthor: (() => {
+        try {
+          const pack = (window.QUOTE_PACKS || {})[localStorage.quotePack || 'founders'] || (window.QUOTE_PACKS || {})['founders'];
+          if (!pack) return '';
+          return pack.quotes[Math.floor(Math.random() * pack.quotes.length)].author;
+        } catch(e) { return ''; }
+      })(),
+      refreshQuote() {
+        const packs = window.QUOTE_PACKS;
+        if (!packs) return;
+        const pack = packs[this.quotePack] || packs['founders'];
+        const idx = Math.floor(Math.random() * pack.quotes.length);
+        this.quoteText = pack.quotes[idx].text;
+        this.quoteAuthor = pack.quotes[idx].author;
+      },
+      setQuotePack(packId) {
+        this.quotePack = packId;
+        localStorage.quotePack = packId;
+        this.refreshQuote();
+      },
+      setQuotePosition(pos) {
+        this.quotePosition = pos;
+        localStorage.quotePosition = pos;
+      },
+      setTheme(t) {
+        this.theme = t;
+        if (t === 'system') {
+          localStorage.removeItem('theme');
+          document.documentElement.removeAttribute('data-theme');
+        } else {
+          localStorage.theme = t;
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      },
+      toggleSidebar() {
+        this.sidebarCollapsed = !this.sidebarCollapsed;
+        localStorage.sidebarCollapsed = this.sidebarCollapsed;
+      },
+      reloadGrid() {
+        const activePanelEl = document.getElementById('active-panel-id');
+        const panelToFetch = activePanelEl ? activePanelEl.value : this.currentPanel;
+        htmx.ajax('GET', '/api/fragments/grid?panel=' + panelToFetch + '&_t=' + Date.now(), {target: '#grid', swap: 'outerHTML', pushUrl: false});
+      },
+      reloadSidebar() {
+        const activePanelEl = document.getElementById('active-panel-id');
+        const panelToFetch = activePanelEl ? activePanelEl.value : this.currentPanel;
+        htmx.ajax('GET', '/api/fragments/sidebar-nav?panelId=' + panelToFetch + '&_t=' + Date.now(), {target: '#sidebar-nav-container', swap: 'outerHTML', pushUrl: false});
+      },
+      playMoveSound() {
+        if (window.playMoveSound) window.playMoveSound();
+      }
+    }`}
+    class="dashboard"
+    x-init="
+      const self = this;
+
+      // Clock Update
+      setInterval(() => {
+        const now = new Date();
+        self.clockText = now.toLocaleDateString('en-US', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        }).toUpperCase() + ' · ' + now.toLocaleTimeString('en-US', { hour12: false });
+      }, 1000);
+
+      // System theme listener
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (self.theme === 'system') {
+          document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        }
+      });
+
+      // Listen for HX-Trigger 'refresh' and 'refreshSidebar' events
+      document.body.addEventListener('refresh', () => { self.reloadGrid(); });
+      document.body.addEventListener('refreshSidebar', () => { self.reloadSidebar(); });
+
+      // Cross-Tab Sync
+      window.dashboardBc = new BroadcastChannel('dashboard-sync');
+      window.dashboardBc.onmessage = (event) => {
+        const data = event.data;
+        if (data === 'refresh' || data.type === 'refresh') {
+          self.reloadGrid();
+          self.reloadSidebar();
+        }
+        if (data.type === 'theme' && data.theme !== self.theme) {
+          self.theme = data.theme;
+          if (self.theme === 'system') {
+            document.documentElement.removeAttribute('data-theme');
+          } else {
+            document.documentElement.setAttribute('data-theme', self.theme);
+          }
+        }
+      };
+
+      // Watch theme and broadcast
+      $watch('theme', (val) => {
+        if (window.dashboardBc) window.dashboardBc.postMessage({ type: 'theme', theme: val });
+      });
+
+      // Keyboard Shortcuts
+      window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || self.modalOpen) return;
+        if (['1','2','3','4','5','6','7','8','9'].includes(e.key)) {
+          const idx = parseInt(e.key) - 1;
+          const tabs = document.querySelectorAll('.sidebar-tab');
+          if (tabs[idx]) tabs[idx].click();
+        }
+      });
+
+      // Global sound synthesizer
+      window.playMoveSound = function() {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
+          oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.05);
+
+          gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+          oscillator.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+
+          oscillator.start();
+          oscillator.stop(audioCtx.currentTime + 0.1);
+        } catch (e) {
+          console.warn('Audio feedback failed', e);
+        }
+      };
+
+      // Broadcast on successful mutations
+      document.body.addEventListener('htmx:afterRequest', (evt) => {
+        if (evt.detail.successful && evt.detail.requestConfig.verb !== 'get') {
+          if (window.dashboardBc) window.dashboardBc.postMessage({ type: 'refresh' });
+        }
+      });
+
+      // Quote: rotate every 30 minutes (initial quote is set synchronously in x-data)
+      setInterval(() => { self.refreshQuote(); }, 1000 * 60 * 30);
+    "
+  >
+    <!-- Hidden active panel for HTMX include -->
+    <input
+      type="hidden"
+      id="active-panel-id"
+      name="panelId"
+      :value="currentPanel"
+    />
+
+    <!-- Modal Overlay -->
+    <div
+      id="overlay"
+      class="modal-overlay"
+      x-show="modalOpen"
+      x-cloak
+      @keydown.escape.window="modalOpen = false"
+      style="display: none;"
+    >
+      <div class="modal" @click.away="modalOpen = false">
+        <p class="modal-title" x-text="modalTitle"></p>
+        <div id="modal-content">
+          <!-- HTMX will load content here -->
+        </div>
+      </div>
+    </div>
+
+    <div class="app-container">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
+        <div class="sidebar-logo">
+          <div class="brand-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              style="width: 20px; height: 20px;"
+            >
+              <path
+                d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.71-2.13.71-2.13s-1.29 0-2.13-.71c-.13-.13-.43-.43-.58-.16z"
+              ></path>
+              <path d="M12 15l-3.5 3.5L5 15l3.5-3.5L12 15z"></path>
+              <path
+                d="M2 2l.74 2.13s0 1.29.71 2.13c.84.71 2.13.71 2.13.71s-.5 3.74-2 5c-1.26 1.5-5 2-5 2s.5-3.74 2-5c1.5-1.26 5-2 5-2"
+              ></path>
+              <path
+                d="M17 7c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"
+              ></path>
+              <path d="M11.5 12.5L7 17"></path>
+              <path d="M22 2l-3 3"></path>
+              <path d="M11 21l-3-3"></path>
+            </svg>
+          </div>
+          <div class="brand-name" x-show="!sidebarCollapsed">
+            MISSION CONTROL
+          </div>
+        </div>
+
+        <div id="sidebar-nav-container">
+          <div
+            hx-get={`/api/fragments/sidebar-nav?panelId=${currentPanelId}`}
+            hx-trigger="load"
+            hx-swap="outerHTML"
+          >
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <!-- Theme toggles moved to main area -->
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+          <div class="top-bar-left">
+            <button
+              class="icon-btn sidebar-toggle"
+              @click="toggleSidebar()"
+              title="Toggle Sidebar"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12h18M3 6h18M3 18h18"></path>
+              </svg>
+            </button>
+            <div class="brand-header">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                class="rocket-icon"
+              >
+                <path
+                  d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.71-2.13.71-2.13s-1.29 0-2.13-.71c-.13-.13-.43-.43-.58-.16z"
+                ></path>
+                <path d="M11.5 12.5L7 17"></path>
+                <path d="M12 15l-3.5 3.5L5 15l3.5-3.5L12 15z"></path>
+                <path
+                  d="M17 7c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"
+                ></path>
+                <path d="M22 2l-3 3"></path>
+              </svg>
+              <h1 class="brand-title">MISSION CONTROL</h1>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="search-box" style="width: 300px; border-radius: 8px;">
+              <svg
+                class="search-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="search"
+                name="q"
+                placeholder="Search resources..."
+                hx-get="/api/fragments/grid"
+                hx-include="#active-panel-id"
+                hx-trigger="keyup changed delay:300ms, search"
+                hx-target="#grid"
+                hx-swap="outerHTML"
+                hx-push-url="false"
+                autocomplete="off"
+                style="text-transform: none; font-weight: 400;"
+              />
+            </div>
+
+            <div class="clock-display" x-text="clockText"></div>
+
+            <button
+              class="btn btn-primary"
+              hx-get="/api/fragments/category-modal"
+              hx-include="#active-panel-id"
+              hx-target="#modal-content"
+              hx-push-url="false"
+              @click="modalOpen = true; modalTitle = 'New Category'"
+              style="border-radius: 8px; border: none; padding: 8px 16px;"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+              Add Category
+            </button>
+          </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <!-- Top Quote Banner (shown when position is 'top') -->
+        <div
+          class="quote-top-banner"
+          x-show="quotePosition === 'top' && quoteText"
+          style="display:none;"
+        >
+          <span class="quote-top-text" x-text="'\u201c' + quoteText + '\u201d'"
+          ></span>
+          <span class="quote-top-author" x-text="'\u2014 ' + quoteAuthor"
+          ></span>
+        </div>
+
+        <div
+          class="grid-container"
+          style="flex: 1; overflow-y: auto; padding: 32px;"
+        >
+          {
+            currentPanelId === "settings" ? (
+              <Settings />
+            ) : (
+              <main
+                id="grid"
+                x-data
+                x-init="
+                Sortable.create($el, {
+                  animation: 150,
+                  handle: '.drag-handle-cat',
+                  onEnd: async () => {
+                    const ids = Array.from($el.children).map(el => el.getAttribute('data-id')).filter(id => id);
+                    if (window.playMoveSound) window.playMoveSound();
+                    await fetch('/api/categories/reorder', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ ids })
+                    });
+                    if (window.dashboardBc) window.dashboardBc.postMessage({ type: 'refresh' });
+                  }
+                });
+              "
+              >
+                {data.length > 0 ? (
+                  data.map((cat) => <Category category={cat} />)
+                ) : (
+                  <div class="empty-page">
+                    <p>
+                      No categories yet.
+                      <br />
+                      Click <strong>+ Category</strong> to get started.
+                    </p>
+                  </div>
+                )}
+              </main>
+            )
+          }
+        </div>
+
+        <footer
+          class="main-footer"
+          style="background: transparent; border: none; padding: 16px 32px; font-size: 12px; color: var(--muted);"
+        >
+          <!-- Rotating Quote Display (bottom position) -->
+          <div
+            class="quote-display"
+            x-show="quotePosition === 'bottom' && quoteText"
+            style="display:none;"
+          >
+            <span class="quote-text" x-text="'“' + quoteText + '”'"></span>
+            <span class="quote-author" x-text="'— ' + quoteAuthor"></span>
+          </div>
+        </footer>
+      </main>
+    </div>
+  </body>
+
+  <style is:global>
+    [x-cloak] {
+      display: none !important;
+    }
+  </style>
+</html>
