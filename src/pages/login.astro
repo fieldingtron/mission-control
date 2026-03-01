@@ -1,0 +1,145 @@
+---
+// Login Page for Mission Control
+---
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Login | Mission Control</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+        <style>
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --border: #334155;
+                --text: #f1f5f9;
+                --muted: #94a3b8;
+                --accent: #3b82f6;
+                --radius: 12px;
+                --shadow:
+                    0 4px 6px -1px rgb(0 0 0 / 0.1),
+                    0 2px 4px -2px rgb(0 0 0 / 0.1);
+            }
+
+            body {
+                font-family:
+                    "Inter",
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                margin: 0;
+                padding: 0;
+                background: var(--bg);
+                color: var(--text);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+            }
+
+            .login-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 40px;
+                width: 100%;
+                max-width: 400px;
+                box-shadow: var(--shadow);
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 24px;
+                font-weight: 800;
+                color: var(--text);
+                margin: 0 0 8px 0;
+                letter-spacing: -0.02em;
+            }
+
+            p {
+                color: var(--muted);
+                font-size: 14px;
+                margin: 0 0 24px 0;
+            }
+
+            .password-input {
+                width: 100%;
+                padding: 12px 16px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                color: var(--text);
+                font-size: 16px;
+                margin-bottom: 12px;
+                outline: none;
+                transition: border-color 0.2s;
+                box-sizing: border-box;
+                font-family: inherit;
+            }
+
+            .password-input:focus {
+                border-color: var(--accent);
+            }
+
+            .login-btn {
+                width: 100%;
+                padding: 12px;
+                background: var(--text);
+                color: var(--surface);
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 15px;
+                cursor: pointer;
+                transition: opacity 0.2s;
+                font-family: inherit;
+            }
+
+            .login-btn:hover {
+                opacity: 0.9;
+            }
+
+            .error-msg {
+                color: #ef4444;
+                font-size: 13px;
+                min-height: 20px;
+                margin-bottom: 12px;
+                text-align: left;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-card">
+            <h1>Mission Control</h1>
+            <p>Please enter the master password to unlock your dashboard.</p>
+
+            <form
+                hx-post="/api/auth/login"
+                hx-target="#auth-error"
+                hx-swap="innerHTML"
+            >
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Master Password"
+                    required
+                    autofocus
+                    class="password-input"
+                />
+                <div id="auth-error" class="error-msg"></div>
+                <button type="submit" class="login-btn">Unlock</button>
+            </form>
+        </div>
+    </body>
+</html>

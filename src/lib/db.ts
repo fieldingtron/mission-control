@@ -2,9 +2,15 @@ import { DatabaseSync } from 'node:sqlite';
 import { existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getDbConfig } from './db-config';
-import { TursoAdapter } from './turso-adapter';
 import { SupabaseAdapter } from './supabase-adapter';
+import dotenv from 'dotenv';
+
+// Force load the .env file if we are in a bare Node context 
+const configPath = join(dirname(fileURLToPath(import.meta.url)), '../../.env');
+dotenv.config({ path: configPath });
+
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 
 // ──────────────────────────────────────────────────────
 //  Types
@@ -364,15 +370,14 @@ export class SqliteAdapter implements DatabaseAdapter {
 let activeAdapter: DatabaseAdapter;
 
 export function initializeAdapter(): void {
-  const config = getDbConfig();
-  console.log(`[DB] Initializing adapter: ${config.provider}`);
+  console.log(`[DB] Initializing adapter: supabase`);
 
-  if (config.provider === 'turso' && config.tursoUrl && config.tursoToken) {
-    activeAdapter = new TursoAdapter(config.tursoUrl, config.tursoToken);
-  } else if (config.provider === 'supabase' && config.supabaseUrl && config.supabaseAnonKey) {
-    activeAdapter = new SupabaseAdapter(config.supabaseUrl, config.supabaseAnonKey);
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.error('[DB] CRITICAL ERROR: SUPABASE_URL and SUPABASE_ANON_KEY must be set in the environment.');
+    // We instantiate it anyway with dummy values to prevent crashing, but it will fail queries
+    activeAdapter = new SupabaseAdapter('https://dummy.supabase.co', 'dummy');
   } else {
-    activeAdapter = new SqliteAdapter();
+    activeAdapter = new SupabaseAdapter(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 
   // Initialization hook for remote adapters if needed
