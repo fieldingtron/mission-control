@@ -1,0 +1,43 @@
+@import "tailwindcss";
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+@layer base {
+    :root {
+        --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        --surface: rgba(255, 255, 255, 0.4);
+        --border: #e2e8f0;
+        --text: #0f172a;
+        --muted: #64748b;
+        --accent: #3b82f6;
+        --accent-hover: #2563eb;
+        --surface-hover: #f1f5f9;
+    }
+
+    [data-theme="dark"] {
+        --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        --surface: rgba(30, 41, 59, 0.4);
+        --border: #334155;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #3b82f6;
+        --surface-hover: #334155;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+            --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            --surface: rgba(30, 41, 59, 0.4);
+            --border: #334155;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --accent: #3b82f6;
+            --surface-hover: #334155;
+        }
+    }
+
+    body {
+        background-image: var(--bg-gradient);
+        background-attachment: fixed;
+        color: var(--text);
+    }
+}

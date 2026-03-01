@@ -4,7 +4,7 @@ const { category } = Astro.props;
 ---
 
 <div
-  class="card category"
+  class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-white/20 rounded-[24px] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 break-inside-avoid mb-5"
   id={`cat-${category.id}`}
   data-id={category.id}
   data-catname={category.name.toLowerCase()}
@@ -12,9 +12,13 @@ const { category } = Astro.props;
   draggable="true"
   @dragstart={`event.dataTransfer.setData('categoryId', '${category.id}')`}
 >
-  <div class="card-header">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <span class="drag-handle-cat">
+  <div
+    class="flex items-center justify-between p-4 bg-transparent border-b border-white/10"
+  >
+    <div class="flex items-center gap-2.5">
+      <span
+        class="drag-handle-cat cursor-grab active:cursor-grabbing text-[var(--muted)] hover:text-[var(--text)] flex items-center p-1 rounded hover:bg-[var(--surface-hover)]"
+      >
         <svg
           width="12"
           height="12"
@@ -29,11 +33,13 @@ const { category } = Astro.props;
           ></circle><circle cx="15" cy="19" r="1"></circle>
         </svg>
       </span>
-      <span class="card-title">{category.name}</span>
+      <span class="text-sm font-bold tracking-tight text-[var(--text)]"
+        >{category.name}</span
+      >
     </div>
-    <div class="card-actions">
+    <div class="flex items-center gap-2">
       <button
-        class="icon-btn"
+        class="w-7 h-7 rounded-md border-none bg-transparent text-[var(--muted)] flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
         title="Add link"
         hx-get={`/api/fragments/link-modal?catId=${category.id}`}
         hx-target="#modal-content"
@@ -51,12 +57,15 @@ const { category } = Astro.props;
         </svg>
       </button>
       <div
-        class="dropdown-wrapper"
+        class="relative inline-block"
         x-data="{ open: false }"
-        :class="{ open: open }"
         @click.away="open = false"
       >
-        <button class="icon-btn" title="More options" @click="open = !open">
+        <button
+          class="w-7 h-7 rounded-md border-none bg-transparent text-[var(--muted)] flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+          title="More options"
+          @click="open = !open"
+        >
           <svg
             width="14"
             height="14"
@@ -69,8 +78,15 @@ const { category } = Astro.props;
             ></circle><circle cx="12" cy="19" r="1"></circle>
           </svg>
         </button>
-        <div class="dropdown-content" x-show="open" x-cloak>
+        <div
+          class="absolute right-0 top-full bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] min-w-[120px] shadow-xl border border-[var(--border)] rounded-lg z-20 mt-1 overflow-hidden"
+          x-show="open"
+          x-transition.opacity.duration.200ms
+          style="display: none;"
+          x-cloak
+        >
           <button
+            class="w-full px-3 py-2 text-left border-none bg-transparent text-[var(--text)] text-[13px] hover:bg-[var(--surface-hover)] cursor-pointer"
             hx-get={`/api/fragments/category-modal?id=${category.id}`}
             hx-target="#modal-content"
             @click="modalOpen = true; modalTitle = 'Rename Category'; open = false;"
@@ -78,7 +94,7 @@ const { category } = Astro.props;
             Rename
           </button>
           <button
-            class="danger"
+            class="w-full px-3 py-2 text-left border-none bg-transparent text-red-500 text-[13px] hover:bg-red-500/10 cursor-pointer"
             hx-get={`/api/fragments/delete-confirm-modal?type=category&id=${category.id}&name=${encodeURIComponent(category.name)}`}
             hx-target="#modal-content"
             @click="modalOpen = true; modalTitle = 'Delete Category'; open = false;"
@@ -90,7 +106,7 @@ const { category } = Astro.props;
     </div>
   </div>
   <ul
-    class="link-list"
+    class="list-none py-2 px-0"
     data-cat-id={category.id}
     x-data
     x-init="
@@ -116,7 +132,9 @@ const { category } = Astro.props;
       category.links.length > 0 ? (
         category.links.map((l) => <Link link={l} />)
       ) : (
-        <li class="link-empty">No links yet</li>
+        <li class="py-3 px-4 text-[var(--muted)] text-[13px] text-center italic">
+          No links yet
+        </li>
       )
     }
   </ul>

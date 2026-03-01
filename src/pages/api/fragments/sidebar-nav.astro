@@ -10,7 +10,7 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
 ---
 
 <nav
-  class="sidebar-nav"
+  class="flex flex-col gap-1 w-full"
   id="sidebar-nav-container"
   x-init={`
         if (window.sidebarSortable) { window.sidebarSortable.destroy(); }
@@ -33,9 +33,12 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
 >
   {
     panels.map((panel) => (
-      <div class="sidebar-tab-wrapper" data-id={panel.id}>
+      <div
+        class="relative flex items-center gap-1 w-full group/tab"
+        data-id={panel.id}
+      >
         <a
-          class={`sidebar-tab ${String(panel.id) === currentPanelId ? "active" : ""}`}
+          class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1 min-w-0 no-underline ${String(panel.id) === currentPanelId ? "bg-[var(--accent)] text-white hover:bg-[var(--accent)] hover:text-white" : "text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"}`}
           href={`/?panel=${panel.id}`}
           hx-get={`/api/fragments/grid?panel=${panel.id}`}
           hx-target="#grid"
@@ -47,7 +50,7 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
         </a>
 
         <button
-          class="panel-delete-btn"
+          class="absolute right-2 opacity-0 bg-transparent border-none text-[var(--muted)] cursor-pointer p-1 rounded transition-all duration-200 flex items-center justify-center group-hover/tab:opacity-60 hover:!opacity-100 hover:bg-red-500/10 hover:!text-red-500"
           @click={`modalOpen = true; modalTitle = 'Delete Panel'`}
           hx-get={`/api/fragments/delete-confirm-modal?type=panel&id=${panel.id}&name=${encodeURIComponent(panel.name)}`}
           hx-target="#modal-content"
@@ -72,7 +75,7 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
 
   <!-- Settings Tab -->
   <a
-    class={`sidebar-tab settings-tab ${currentPanelId === "settings" ? "active" : ""}`}
+    class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1 min-w-0 no-underline ${currentPanelId === "settings" ? "bg-[var(--accent)] text-white hover:bg-[var(--accent)] hover:text-white" : "text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"}`}
     href="/?panel=settings"
     hx-get="/api/fragments/settings"
     hx-target="#grid"
@@ -97,7 +100,7 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
     Settings
   </a>
   <a
-    class={`sidebar-tab sidebar-tab-icon settings-tab ${currentPanelId === "settings" ? "active" : ""}`}
+    class={`flex justify-center items-center p-2.5 rounded-lg text-xl font-medium transition-all duration-200 no-underline ${currentPanelId === "settings" ? "bg-[var(--accent)] text-white" : "text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"}`}
     href="/?panel=settings"
     hx-get="/api/fragments/settings"
     hx-target="#grid"
@@ -124,7 +127,7 @@ const currentPanelId = Astro.url.searchParams.get("panelId") || "1";
 
   <!-- Add Panel Button -->
   <button
-    class="sidebar-add-btn"
+    class="flex items-center justify-center gap-2 px-3 py-2.5 mt-3 rounded-lg bg-transparent border border-dashed border-[var(--border)] text-[var(--muted)] text-[13px] font-medium cursor-pointer transition-all duration-200 w-full hover:bg-[var(--surface-hover)] hover:text-[var(--text)] hover:border-[var(--muted)]"
     @click={`modalOpen = true; modalTitle = 'New Panel'`}
     hx-get="/api/fragments/panel-modal"
     hx-target="#modal-content"

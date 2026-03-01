@@ -28,8 +28,12 @@ const triggerEvents = `change, keyup delay:1s, paste delay:1s, keydown[key=='Ent
   @htmx:after-request="if (event.detail.target.id === 'modal-form') modalOpen = false"
   autocomplete="off"
 >
-  <div class="field" id="name-wrapper">
-    <label for="f-name">Name</label>
+  <div class="mb-5" id="name-wrapper">
+    <label
+      for="f-name"
+      class="block text-[13px] font-semibold text-[var(--muted)] mb-1.5"
+      >Name</label
+    >
     <input
       id="f-name"
       type="text"
@@ -38,11 +42,16 @@ const triggerEvents = `change, keyup delay:1s, paste delay:1s, keydown[key=='Ent
       placeholder="e.g. GitHub"
       required
       autofocus
+      class="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm outline-none transition-colors duration-200 focus:border-[var(--accent)]"
     />
   </div>
 
-  <div class="field">
-    <label for="f-url">URL</label>
+  <div class="mb-5">
+    <label
+      for="f-url"
+      class="block text-[13px] font-semibold text-[var(--muted)] mb-1.5"
+      >URL</label
+    >
     <input
       id="f-url"
       type="text"
@@ -56,23 +65,37 @@ const triggerEvents = `change, keyup delay:1s, paste delay:1s, keydown[key=='Ent
       hx-swap="innerHTML"
       @keydown.enter.prevent="htmx.trigger(this, 'change')"
       required
+      class="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm outline-none transition-colors duration-200 focus:border-[var(--accent)]"
     />
   </div>
 
-  <div class="field">
-    <label for="f-description">Description</label>
+  <div class="mb-5">
+    <label
+      for="f-description"
+      class="block text-[13px] font-semibold text-[var(--muted)] mb-1.5"
+      >Description</label
+    >
     <input
       id="f-description"
       type="text"
       name="description"
       value={link?.description || ""}
       placeholder="Short note…"
+      class="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm outline-none transition-colors duration-200 focus:border-[var(--accent)]"
     />
   </div>
 
-  <div class="field">
-    <label for="f-cat">Category</label>
-    <select name="category_id" id="f-cat">
+  <div class="mb-5">
+    <label
+      for="f-cat"
+      class="block text-[13px] font-semibold text-[var(--muted)] mb-1.5"
+      >Category</label
+    >
+    <select
+      name="category_id"
+      id="f-cat"
+      class="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm outline-none transition-colors duration-200 focus:border-[var(--accent)]"
+    >
       {
         categories.map((c) => (
           <option value={c.id} selected={c.id === selectedCatId}>
@@ -83,10 +106,16 @@ const triggerEvents = `change, keyup delay:1s, paste delay:1s, keydown[key=='Ent
     </select>
   </div>
 
-  <div class="modal-footer">
-    <button type="button" class="btn btn-ghost" @click="modalOpen = false"
-      >Cancel</button
+  <div class="flex justify-end gap-3 mt-8">
+    <button
+      type="button"
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 bg-transparent text-[var(--muted)] border border-[var(--border)] hover:text-[var(--text)] hover:border-[var(--text)]"
+      @click="modalOpen = false">Cancel</button
     >
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button
+      type="submit"
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 border-none bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
+      >Save</button
+    >
   </div>
 </form>

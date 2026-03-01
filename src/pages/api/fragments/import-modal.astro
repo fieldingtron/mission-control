@@ -7,25 +7,43 @@
     hx-encoding="multipart/form-data"
     class="import-form"
 >
-    <div class="field">
-        <label>SELECT BOOKMARKS FILE (HTML)</label>
-        <input type="file" name="bookmarks" accept=".html" required />
+    <div class="mb-5">
+        <label
+            class="block text-[13px] font-semibold text-[var(--muted)] mb-1.5"
+            >SELECT BOOKMARKS FILE (HTML)</label
+        >
+        <input
+            type="file"
+            name="bookmarks"
+            accept=".html"
+            required
+            class="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm outline-none transition-colors duration-200 focus:border-[var(--accent)]"
+        />
     </div>
 
-    <div class="field" style="margin-top: 16px;">
-        <label>OR PASTE URLS (ONE PER LINE)</label>
+    <div class="mb-5 mt-4">
+        <label
+            class="block text-[13px] font-semibold text-[var(--muted)] mb-1.5"
+            >OR PASTE URLS (ONE PER LINE)</label
+        >
         <textarea
             name="urls"
             rows="5"
             placeholder="https://example.com"
-            style="width: 100%; font-family: inherit; font-size: 11px; padding: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);"
+            class="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-[11px] font-[inherit] outline-none transition-colors duration-200 focus:border-[var(--accent)]"
         ></textarea>
     </div>
 
-    <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" @click="modalOpen = false"
-            >CANCEL</button
+    <div class="flex justify-end gap-3 mt-8">
+        <button
+            type="button"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 bg-transparent text-[var(--muted)] border border-[var(--border)] hover:text-[var(--text)] hover:border-[var(--text)]"
+            @click="modalOpen = false">CANCEL</button
         >
-        <button type="submit" class="btn btn-primary">IMPORT</button>
+        <button
+            type="submit"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 border-none bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
+            >IMPORT</button
+        >
     </div>
 </form>

@@ -24,11 +24,15 @@ if (type === "panel") {
 }
 ---
 
-<div class="delete-confirmation">
-    <p class="delete-message">{message}</p>
+<div class="">
+    <p class="text-[15px] leading-relaxed text-[var(--text)] mb-6">{message}</p>
 
-    <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" @click="modalOpen = false">
+    <div class="flex justify-end gap-3 mt-8">
+        <button
+            type="button"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 bg-transparent text-[var(--muted)] border border-[var(--border)] hover:text-[var(--text)] hover:border-[var(--text)]"
+            @click="modalOpen = false"
+        >
             Cancel
         </button>
 
@@ -36,7 +40,7 @@ if (type === "panel") {
             type === "panel" ? (
                 <button
                     type="button"
-                    class="btn btn-danger"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 border-none bg-red-500 text-white hover:bg-red-600"
                     @click={`
                     modalOpen = false;
                     fetch('${deleteUrl}', { method: 'DELETE' }).then(() => {
@@ -60,7 +64,7 @@ if (type === "panel") {
             ) : (
                 <button
                     type="button"
-                    class="btn btn-danger"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 border-none bg-red-500 text-white hover:bg-red-600"
                     hx-delete={deleteUrl}
                     hx-target={target}
                     hx-swap="outerHTML"
@@ -72,19 +76,3 @@ if (type === "panel") {
         }
     </div>
 </div>
-
-<style>
-    .delete-message {
-        font-size: 15px;
-        line-height: 1.5;
-        color: var(--text);
-        margin-bottom: 24px;
-    }
-    .btn-danger {
-        background: #ef4444;
-        color: white;
-    }
-    .btn-danger:hover {
-        background: #dc2626;
-    }
-</style>

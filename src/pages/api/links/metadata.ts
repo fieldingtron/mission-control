@@ -59,7 +59,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Return the updated fields as a fragment to be swapped in
     return new Response(`
-    <label for="f-name">Name</label>
+    <label for="f-name" class="block text-[13px] font-semibold text-[var(--muted)] mb-1.5">Name</label>
     <input
       id="f-name"
       type="text"
@@ -67,6 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
       value="${escapeHtml(name.trim())}"
       placeholder="e.g. GitHub"
       required
+      class="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm outline-none transition-colors duration-200 focus:border-[var(--accent)]"
     />
 
     <input type="hidden" id="metadata-desc-value" value="${escapeHtml(description.trim())}" />

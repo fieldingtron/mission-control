@@ -17,16 +17,16 @@ function getFavicon(url) {
 ---
 
 <li
-  class="link-row"
+  class="group flex items-center justify-between px-3 py-2 rounded-lg mb-0.5 transition-colors duration-200 hover:bg-[var(--surface-hover)]"
   id={`link-${link.id}`}
   data-id={link.id}
   data-search={`${link.name.toLowerCase()} ${link.url.toLowerCase()} ${link.description?.toLowerCase() || ""}`}
   x-show="!searchQuery || $el.dataset.search.includes(searchQuery.toLowerCase()) || $el.closest('.card').dataset.catname.includes(searchQuery.toLowerCase())"
 >
-  <div
-    style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;"
-  >
-    <span class="drag-handle-link">
+  <div class="flex items-center gap-3 flex-1 min-w-0">
+    <span
+      class="cursor-grab active:cursor-grabbing text-[var(--muted)] opacity-0 group-hover:opacity-50 hover:!opacity-100 hover:text-[var(--text)] hover:bg-[var(--surface-hover)] flex items-center p-0.5 rounded transition-opacity duration-200"
+    >
       <svg
         width="10"
         height="10"
@@ -41,22 +41,38 @@ function getFavicon(url) {
         ></circle><circle cx="15" cy="19" r="1"></circle>
       </svg>
     </span>
-    <div class="favicon-wrapper">
-      <img class="favicon" src={getFavicon(link.url)} alt="" loading="lazy" />
+    <div
+      class="w-6 h-6 flex items-center justify-center bg-white rounded-md p-1 shrink-0"
+    >
+      <img
+        class="w-full h-full object-contain"
+        src={getFavicon(link.url)}
+        alt=""
+        loading="lazy"
+      />
     </div>
-    <div class="link-content">
+    <div class="flex flex-col min-w-0">
       <a
         href={link.url}
         target="_blank"
         rel="noopener noreferrer"
-        class="link-name">{link.name}</a
+        class="text-[13px] font-semibold text-[var(--text)] no-underline whitespace-nowrap overflow-hidden text-ellipsis hover:underline hover:decoration-[var(--accent)]"
+        >{link.name}</a
       >
-      {link.description && <p class="link-desc">{link.description}</p>}
+      {
+        link.description && (
+          <p class="text-[11px] text-[var(--muted)] whitespace-nowrap overflow-hidden text-ellipsis mt-0.5">
+            {link.description}
+          </p>
+        )
+      }
     </div>
   </div>
-  <div class="link-row-actions">
+  <div
+    class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+  >
     <button
-      class="icon-btn"
+      class="w-7 h-7 rounded-md border-none bg-transparent text-[var(--muted)] flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
       title="Edit"
       hx-get={`/api/fragments/link-modal?id=${link.id}`}
       hx-target="#modal-content"
@@ -77,7 +93,7 @@ function getFavicon(url) {
       </svg>
     </button>
     <button
-      class="icon-btn danger"
+      class="w-7 h-7 rounded-md border-none bg-transparent text-[var(--muted)] flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-red-500 hover:bg-red-500/10"
       title="Delete"
       hx-get={`/api/fragments/delete-confirm-modal?type=link&id=${link.id}`}
       hx-target="#modal-content"
