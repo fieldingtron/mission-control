@@ -1072,6 +1072,7 @@ header h1 {
 
 .settings-root {
   width: 100%;
+  column-count: 1 !important;
 }
 
 .settings-layout {
