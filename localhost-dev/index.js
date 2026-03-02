@@ -1,8 +1,92 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import http from 'node:http';
+
+// Caddy Admin API helper (module-level so ensureCaddy can use it)
+const caddyRequest = (path, method, body) => {
+    return new Promise((resolve, reject) => {
+        const req = http.request({
+            hostname: 'localhost',
+            port: 2019,
+            path,
+            method,
+            headers: body ? { 'Content-Type': 'application/json' } : {}
+        }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    resolve(data ? JSON.parse(data) : null);
+                } else {
+                    reject(new Error(`Caddy API error: ${res.statusCode} - ${data}`));
+                }
+            });
+        });
+        req.on('error', () => reject(new Error(`Could not connect to Caddy Admin API. Is Caddy running? Try: brew services start caddy`)));
+        if (body) req.write(JSON.stringify(body));
+        req.end();
+    });
+};
+
+// Start Caddy if its admin API is not reachable, then wait for it to be ready.
+// Also ensures the HTTP server (srv0) and TLS app exist, since Caddy may have
+// been launched from a minimal Caddyfile that only enables the admin API.
+async function ensureCaddy() {
+    const isRunning = await caddyRequest('/config/', 'GET').then(() => true).catch(() => false);
+
+    if (!isRunning) {
+        console.log('🔄 Caddy is not running. Starting it now...');
+        const configPath = join(process.cwd(), 'caddy-config.json');
+        const result = spawnSync('caddy', ['start', '--config', configPath, '--adapter', 'json'], {
+            stdio: 'inherit'
+        });
+
+        if (result.error || (result.status !== 0 && result.status !== null)) {
+            throw new Error(
+                `Could not start Caddy: ${result.error?.message || `exit code ${result.status}`}. ` +
+                `Install it first: brew install caddy`
+            );
+        }
+
+        // Poll admin API until ready (up to 5 seconds)
+        for (let i = 0; i < 10; i++) {
+            await new Promise(r => setTimeout(r, 500));
+            const ready = await caddyRequest('/config/', 'GET').then(() => true).catch(() => false);
+            if (ready) {
+                console.log('✅ Caddy started successfully.');
+                break;
+            }
+            if (i === 9) throw new Error('Caddy started but admin API is not responding after 5 seconds.');
+        }
+    }
+
+    // Ensure the HTTP server (srv0) and TLS automation exist.
+    // They may be absent when Caddy was launched from the minimal Caddyfile.
+    const current = await caddyRequest('/config/', 'GET').catch(() => ({}));
+    const hasSrv0 = current?.apps?.http?.servers?.srv0;
+    const hasTLS = current?.apps?.tls;
+
+    if (!hasSrv0 || !hasTLS) {
+        console.log('⚙️  Initializing Caddy HTTP server and TLS configuration...');
+        await caddyRequest('/config/', 'PUT', {
+            admin: { listen: 'localhost:2019' },
+            apps: {
+                http: {
+                    servers: {
+                        srv0: {
+                            listen: [':80', ':443'],
+                            routes: hasSrv0?.routes || []
+                        }
+                    }
+                },
+                tls: hasTLS || { automation: { policies: [] } }
+            }
+        });
+        console.log('✅ Caddy HTTP server initialized.');
+    }
+}
 
 async function main() {
     const args = process.argv.slice(2);
@@ -36,36 +120,12 @@ async function main() {
     const port = 10000 + (parseInt(hash.slice(0, 8), 16) % 50000);
 
     const routeId = `localhost-dev-${pkg.name || 'app'}`;
-    const httpsRouteId = `${routeId}-https`;
-
-    // 4. Caddy Admin API functions
-    const caddyRequest = (path, method, body) => {
-        return new Promise((resolve, reject) => {
-            const req = http.request({
-                hostname: 'localhost',
-                port: 2019,
-                path,
-                method,
-                headers: body ? { 'Content-Type': 'application/json' } : {}
-            }, (res) => {
-                let data = '';
-                res.on('data', chunk => data += chunk);
-                res.on('end', () => {
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        resolve(data ? JSON.parse(data) : null);
-                    } else {
-                        reject(new Error(`Caddy API error: ${res.statusCode} - ${data}`));
-                    }
-                });
-            });
-            req.on('error', (err) => reject(new Error(`Could not connect to Caddy Admin API. Is Caddy running? Try: brew services start caddy`)));
-            if (body) req.write(JSON.stringify(body));
-            req.end();
-        });
-    };
 
     try {
         console.log(`🚀 Starting localhost-dev for ${hostname}...`);
+
+        // 4. Ensure Caddy is running before touching its API
+        await ensureCaddy();
 
         // 5. Setup Caddy Routes (Idempotent)
 
@@ -78,7 +138,6 @@ async function main() {
                 subjects: [hostname],
                 issuers: [{ module: 'internal' }]
             }).catch(err => {
-                // If it fails with "already exists" or similar but we missed it in the GET, ignore
                 if (!err.message.includes('already exists')) {
                     console.warn(`⚠️  Note: Could not set TLS policy: ${err.message}`);
                 }
@@ -95,7 +154,6 @@ async function main() {
                 headers: { "Location": ["https://{http.request.host}{http.request.uri}"] }
             }]
         }).catch(async () => {
-            // If already exists, update it
             await caddyRequest(`/id/${routeId}-redir`, 'PUT', {
                 match: [{ host: [hostname], protocol: "http" }],
                 handle: [{
@@ -106,7 +164,7 @@ async function main() {
             }).catch(e => console.warn(`⚠️  Warning updating redirect: ${e.message}`));
         });
 
-        // Setup/Update Proxy Route (SSL only if combined with the above logic, or we can just let it proxy)
+        // Setup/Update Proxy Route
         await caddyRequest(`/config/apps/http/servers/srv0/routes`, 'POST', {
             "@id": routeId,
             match: [{ host: [hostname] }],
@@ -115,7 +173,6 @@ async function main() {
                 upstreams: [{ dial: `localhost:${port}` }]
             }]
         }).catch(async (err) => {
-            // If it already exists, replace it
             await caddyRequest(`/id/${routeId}`, 'PUT', {
                 match: [{ host: [hostname] }],
                 handle: [{
@@ -129,7 +186,6 @@ async function main() {
 
         console.log(`✅ Proxy: http://${hostname} -> localhost:${port}`);
         console.log(`✅ Proxy: https://${hostname} -> localhost:${port}`);
-        console.log(`\n🔐 Tip: For a "Secure" lock in your browser, run: sudo caddy trust`);
 
         // 6. Start Child Process
         const [cmd, ...cmdArgs] = args;

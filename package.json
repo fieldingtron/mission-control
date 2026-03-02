@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node ./localhost-dev/bin/localhost-dev.js npm run dev:astro",
     "dev:astro": "NODE_OPTIONS=--experimental-sqlite astro dev",
+    "postinstall": "node install.js",
     "setup": "node install.js",
     "build": "NODE_OPTIONS=--experimental-sqlite astro build",
     "preview": "NODE_OPTIONS=--experimental-sqlite astro preview",
