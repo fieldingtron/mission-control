@@ -1,21 +1,21 @@
-import { pgTable, serial, text, integer, timestamp } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
+import { relations, sql } from 'drizzle-orm';
 
-export const panels = pgTable('panels', {
-    id: serial('id').primaryKey(),
+export const panels = sqliteTable('panels', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
     name: text('name').notNull(),
     position: integer('position').notNull().default(0),
 });
 
-export const categories = pgTable('categories', {
-    id: serial('id').primaryKey(),
+export const categories = sqliteTable('categories', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
     panel_id: integer('panel_id').references(() => panels.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     position: integer('position').notNull().default(0),
 });
 
-export const links = pgTable('links', {
-    id: serial('id').primaryKey(),
+export const links = sqliteTable('links', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
     category_id: integer('category_id').notNull().references(() => categories.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     url: text('url').notNull(),
@@ -23,9 +23,9 @@ export const links = pgTable('links', {
     description: text('description'),
 });
 
-export const backups = pgTable('backups', {
-    id: serial('id').primaryKey(),
-    created_at: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull().defaultNow(),
+export const backups = sqliteTable('backups', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
     label: text('label'),
     data: text('data').notNull(),
 });

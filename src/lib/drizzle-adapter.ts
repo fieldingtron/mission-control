@@ -1,21 +1,63 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
 import { eq, asc, desc, sql } from 'drizzle-orm';
 import type { DatabaseAdapter, Panel, PanelWithCount, Category, CategoryWithPanel, Link, Backup, Snapshot } from './db';
 import * as schema from './schema';
 
 export class DrizzleAdapter implements DatabaseAdapter {
     private db: ReturnType<typeof drizzle>;
-    private client: postgres.Sql;
+    private client: ReturnType<typeof createClient>;
 
     constructor(url: string) {
-        this.client = postgres(url, { prepare: false });
+        this.client = createClient({ url });
         this.db = drizzle(this.client, { schema });
     }
 
     async init(): Promise<void> {
-        // Drizzle schema is managed via `drizzle-kit push` or migrations, 
-        // leaving initialization to the deploy step. 
+        try {
+            await this.client.execute(`
+                CREATE TABLE IF NOT EXISTS panels (
+                    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name     TEXT NOT NULL,
+                    position INTEGER NOT NULL DEFAULT 0
+                );
+            `);
+            await this.client.execute(`
+                CREATE TABLE IF NOT EXISTS categories (
+                    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                    panel_id INTEGER REFERENCES panels(id) ON DELETE CASCADE,
+                    name     TEXT NOT NULL,
+                    position INTEGER NOT NULL DEFAULT 0
+                );
+            `);
+            await this.client.execute(`
+                CREATE TABLE IF NOT EXISTS links (
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+                    name        TEXT NOT NULL,
+                    url         TEXT NOT NULL,
+                    position    INTEGER NOT NULL DEFAULT 0,
+                    description TEXT
+                );
+            `);
+            await this.client.execute(`
+                CREATE TABLE IF NOT EXISTS backups (
+                    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                    label      TEXT,
+                    data       TEXT NOT NULL
+                );
+            `);
+
+            const result = await this.client.execute('SELECT COUNT(*) as count FROM panels');
+            const count = Number(result.rows[0].count) || 0;
+            if (count === 0) {
+                await this.client.execute("INSERT INTO panels (name, position) VALUES ('WORK', 1), ('LEARNING', 2), ('NEWS', 3)");
+            }
+            console.log('[DB] SQLite schema successfully initialized natively.');
+        } catch (e) {
+            console.error('[DB] Failed to initialize SQLite schema:', e);
+        }
     }
 
     // ── Panels ─────────────────────────────────────────
@@ -232,23 +274,7 @@ export class DrizzleAdapter implements DatabaseAdapter {
     }
 
     async syncSequences(): Promise<void> {
-        try {
-            const panelsMax = await this.db.select({ maxId: sql<number>`max(id)` }).from(schema.panels);
-            const catsMax = await this.db.select({ maxId: sql<number>`max(id)` }).from(schema.categories);
-            const linksMax = await this.db.select({ maxId: sql<number>`max(id)` }).from(schema.links);
-
-            const pid = panelsMax[0]?.maxId || 0;
-            const cid = catsMax[0]?.maxId || 0;
-            const lid = linksMax[0]?.maxId || 0;
-
-            if (pid > 0) await this.client`SELECT setval('panels_id_seq', ${pid})`;
-            if (cid > 0) await this.client`SELECT setval('categories_id_seq', ${cid})`;
-            if (lid > 0) await this.client`SELECT setval('links_id_seq', ${lid})`;
-
-            console.log('[DB] Sequences synchronized successfully using Postgres raw queries.');
-        } catch (e) {
-            console.error('[DB] Failed to sync sequences after restore/import:', e);
-        }
+        console.log('[DB] Sequences sync skipped (handled natively by SQLite AUTOINCREMENT).');
     }
 
     async getFullSnapshot(): Promise<Snapshot> {

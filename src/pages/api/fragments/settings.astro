@@ -7,12 +7,17 @@ const categories = await db.getCategoriesWithPanel();
 const backups = await db.getBackups(10);
 ---
 
-<main id="grid" class="p-8 flex-1 overflow-y-auto max-w-[1200px] mx-auto w-full">
+<main
+    id="grid"
+    class="p-8 flex-1 overflow-y-auto max-w-[1200px] mx-auto w-full"
+>
     <div class="flex flex-col lg:flex-row gap-8 items-start w-full">
         <!-- ── COLUMN 1: Appearance & Quotes ────────────────── -->
         <div class="flex flex-col gap-6 flex-1 min-w-0 w-full">
             <!-- Appearance -->
-            <div class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6">
+            <div
+                class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6"
+            >
                 <div class="flex items-center gap-2.5 mb-5">
                     <svg
                         width="14"
@@ -25,7 +30,9 @@ const backups = await db.getBackups(10);
                             d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
                         ></path></svg
                     >
-                    <h3 class="text-base font-bold m-0 text-[var(--text)]">Appearance</h3>
+                    <h3 class="text-base font-bold m-0 text-[var(--text)]">
+                        Appearance
+                    </h3>
                 </div>
                 <div class="grid grid-cols-3 gap-3">
                     <button
@@ -33,7 +40,10 @@ const backups = await db.getBackups(10);
                         @click="setTheme('light')"
                         :class="{ active: theme === 'light' }"
                     >
-                        <div class="w-full aspect-[4/3] rounded-lg shadow-sm border border-white/10" style="background:#ffffff;">
+                        <div
+                            class="w-full aspect-[4/3] rounded-lg shadow-sm border border-white/10"
+                            style="background:#ffffff;"
+                        >
                         </div>
                         <span>Light</span>
                     </button>
@@ -42,7 +52,10 @@ const backups = await db.getBackups(10);
                         @click="setTheme('dark')"
                         :class="{ active: theme === 'dark' }"
                     >
-                        <div class="w-full aspect-[4/3] rounded-lg shadow-sm border border-white/10" style="background:#0f172a;">
+                        <div
+                            class="w-full aspect-[4/3] rounded-lg shadow-sm border border-white/10"
+                            style="background:#0f172a;"
+                        >
                         </div>
                         <span>Dark</span>
                     </button>
@@ -62,7 +75,9 @@ const backups = await db.getBackups(10);
             </div>
 
             <!-- Quote Display -->
-            <div class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6">
+            <div
+                class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6"
+            >
                 <div class="flex items-center gap-2.5 mb-5">
                     <svg
                         width="14"
@@ -77,13 +92,19 @@ const backups = await db.getBackups(10);
                             d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"
                         ></path></svg
                     >
-                    <h3 class="text-base font-bold m-0 text-[var(--text)]">Quote Display</h3>
+                    <h3 class="text-base font-bold m-0 text-[var(--text)]">
+                        Quote Display
+                    </h3>
                 </div>
                 <p class="text-[13px] text-[var(--muted)] leading-relaxed mb-5">
                     Quotes rotate on page load and every 30 minutes.
                 </p>
 
-                <div class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-2.5">Collection</div>
+                <div
+                    class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-2.5"
+                >
+                    Collection
+                </div>
                 <div class="flex flex-col gap-2">
                     <button
                         class="relative flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] cursor-pointer text-left transition-all duration-200 hover:border-white/30 [&.active]:border-[var(--accent)] [&.active]:bg-white/5"
@@ -92,8 +113,14 @@ const backups = await db.getBackups(10);
                     >
                         <span class="text-2xl">🇺🇸</span>
                         <div class="flex-1 min-w-0">
-                            <div class="text-[13px] font-semibold text-[var(--text)]">American Founders</div>
-                            <div class="text-[11px] text-[var(--muted)] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+                            <div
+                                class="text-[13px] font-semibold text-[var(--text)]"
+                            >
+                                American Founders
+                            </div>
+                            <div
+                                class="text-[11px] text-[var(--muted)] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis"
+                            >
                                 Washington, Jefferson, Franklin &amp; more
                             </div>
                         </div>
@@ -111,8 +138,14 @@ const backups = await db.getBackups(10);
                     >
                         <span class="text-2xl">🌙</span>
                         <div class="flex-1 min-w-0">
-                            <div class="text-[13px] font-semibold text-[var(--text)]">Rumi</div>
-                            <div class="text-[11px] text-[var(--muted)] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+                            <div
+                                class="text-[13px] font-semibold text-[var(--text)]"
+                            >
+                                Rumi
+                            </div>
+                            <div
+                                class="text-[11px] text-[var(--muted)] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis"
+                            >
                                 Mystical poems &amp; proverbs
                             </div>
                         </div>
@@ -125,7 +158,12 @@ const backups = await db.getBackups(10);
                     </button>
                 </div>
 
-                <div class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-2.5" style="margin-top:20px;">Position</div>
+                <div
+                    class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-2.5"
+                    style="margin-top:20px;"
+                >
+                    Position
+                </div>
                 <div class="flex gap-2">
                     <button
                         class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] cursor-pointer transition-all duration-200 text-[13px] font-semibold text-[var(--muted)] hover:border-white/40 [&.active]:border-[var(--accent)] [&.active]:text-[var(--accent)] [&.active]:bg-[var(--accent)]/10"
@@ -169,7 +207,9 @@ const backups = await db.getBackups(10);
             </div>
 
             <!-- Import Bookmarks -->
-            <div class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-4">
+            <div
+                class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-4"
+            >
                 <div class="flex items-center gap-4">
                     <span
                         class="w-10 h-10 rounded-[10px] bg-white/5 flex items-center justify-center text-xl shrink-0"
@@ -190,8 +230,12 @@ const backups = await db.getBackups(10);
                         </svg>
                     </span>
                     <div style="flex:1;">
-                        <span class="block text-[14px] font-bold text-[var(--text)]">Import Data</span>
-                        <span class="block text-[11px] text-[var(--muted)] mt-0.5"
+                        <span
+                            class="block text-[14px] font-bold text-[var(--text)]"
+                            >Import Data</span
+                        >
+                        <span
+                            class="block text-[11px] text-[var(--muted)] mt-0.5"
                             >Upload Netscape HTML Bookmarks</span
                         >
                     </div>
@@ -208,60 +252,24 @@ const backups = await db.getBackups(10);
                 </div>
             </div>
 
-            <!-- Account & Security -->
-            <div class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6">
-                <div class="flex items-center gap-2.5 mb-5">
-                    <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"
-                        ></rect>
-                        <path d="M7 11V7a5 5 0 0110 0v4"></path>
-                    </svg>
-                    <h3 class="text-base font-bold m-0 text-[var(--text)]">Account Security</h3>
-                </div>
-                <p class="text-[13px] text-[var(--muted)] leading-relaxed mb-5" style="margin-bottom: 15px;">
-                    You are currently authenticated with the Master Password. Be
-                    sure to log out when accessing your dashboard from a public
-                    device.
-                </p>
-                <form hx-post="/api/auth/logout">
-                    <button
-                        type="submit"
-                        class="btn btn-danger"
-                        style="width: 100%; justify-content: center;"
-                    >
-                        <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            style="margin-right: 6px;"
-                        >
-                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"
-                            ></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        Log Out
-                    </button>
-                </form>
-            </div>
-
             <!-- About -->
-            <div class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-4">
+            <div
+                class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-4"
+            >
                 <div class="flex items-center gap-4">
-                    <span class="w-10 h-10 rounded-[10px] bg-white/5 flex items-center justify-center text-xl shrink-0">🚀</span>
+                    <span
+                        class="w-10 h-10 rounded-[10px] bg-white/5 flex items-center justify-center text-xl shrink-0"
+                        >🚀</span
+                    >
                     <div>
-                        <span class="block text-[14px] font-bold text-[var(--text)]">Mission Control</span>
-                        <span class="block text-[11px] font-medium text-[var(--muted)] px-1.5 py-0.5 bg-[var(--surface-hover)] rounded mt-1 w-max">v1.0.0</span>
+                        <span
+                            class="block text-[14px] font-bold text-[var(--text)]"
+                            >Mission Control</span
+                        >
+                        <span
+                            class="block text-[11px] font-medium text-[var(--muted)] px-1.5 py-0.5 bg-[var(--surface-hover)] rounded mt-1 w-max"
+                            >v1.0.0</span
+                        >
                     </div>
                 </div>
             </div>
@@ -270,7 +278,9 @@ const backups = await db.getBackups(10);
         <!-- ── COLUMN 2: Backups & Categories ──────────────── -->
         <div class="flex flex-col gap-6 flex-1 min-w-0 w-full">
             <!-- Backups -->
-            <div class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6">
+            <div
+                class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6"
+            >
                 <div class="flex items-center gap-2.5 mb-5">
                     <svg
                         width="14"
@@ -284,8 +294,13 @@ const backups = await db.getBackups(10);
                         ></polyline><line x1="12" y1="3" x2="12" y2="15"
                         ></line></svg
                     >
-                    <h3 class="text-base font-bold m-0 text-[var(--text)]">Backups</h3>
-                    <span class="text-[11px] px-2 py-0.5 bg-[var(--surface-hover)] rounded-full text-[var(--muted)]">Last 10</span>
+                    <h3 class="text-base font-bold m-0 text-[var(--text)]">
+                        Backups
+                    </h3>
+                    <span
+                        class="text-[11px] px-2 py-0.5 bg-[var(--surface-hover)] rounded-full text-[var(--muted)]"
+                        >Last 10</span
+                    >
                 </div>
                 <button
                     class="flex items-center justify-center gap-2 w-full p-2.5 bg-[var(--accent)] text-white rounded-lg font-semibold text-sm border-none cursor-pointer transition-colors duration-200 mb-4 hover:bg-[var(--accent-hover)]"
@@ -328,7 +343,10 @@ const backups = await db.getBackups(10);
                             </div>
                         ) : (
                             backups.map((b) => (
-                                <div class="flex items-center justify-between p-3 bg-transparent border border-[var(--border)] rounded-xl transition-colors duration-200 hover:border-white/30" id={`backup-${b.id}`}>
+                                <div
+                                    class="flex items-center justify-between p-3 bg-transparent border border-[var(--border)] rounded-xl transition-colors duration-200 hover:border-white/30"
+                                    id={`backup-${b.id}`}
+                                >
                                     <div class="flex flex-col min-w-0">
                                         <span class="text-[13px] font-semibold text-[var(--text)] whitespace-nowrap overflow-hidden text-ellipsis">
                                             {b.label}
@@ -384,7 +402,10 @@ const backups = await db.getBackups(10);
             </div>
 
             <!-- Category Management -->
-            <div class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6" style="flex:1;">
+            <div
+                class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6"
+                style="flex:1;"
+            >
                 <div class="flex items-center gap-2.5 mb-5">
                     <svg
                         width="14"
@@ -399,8 +420,13 @@ const backups = await db.getBackups(10);
                         ></rect><rect x="14" y="14" width="7" height="7" rx="1"
                         ></rect></svg
                     >
-                    <h3 class="text-base font-bold m-0 text-[var(--text)]">Categories</h3>
-                    <span class="text-[11px] px-2 py-0.5 bg-[var(--surface-hover)] rounded-full text-[var(--muted)]">{categories.length} total</span>
+                    <h3 class="text-base font-bold m-0 text-[var(--text)]">
+                        Categories
+                    </h3>
+                    <span
+                        class="text-[11px] px-2 py-0.5 bg-[var(--surface-hover)] rounded-full text-[var(--muted)]"
+                        >{categories.length} total</span
+                    >
                 </div>
                 <div class="flex flex-col gap-2">
                     {
@@ -507,7 +533,10 @@ const backups = await db.getBackups(10);
 
         <!-- ── COLUMN 3: Panel Management ──────────────────── -->
         <div class="flex flex-col gap-6 flex-1 min-w-0 w-full">
-            <div class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6" style="flex:1;">
+            <div
+                class="bg-[var(--surface)] backdrop-blur-xl backdrop-saturate-[1.8] border border-[var(--border)] rounded-[20px] p-6"
+                style="flex:1;"
+            >
                 <div class="flex items-center gap-2.5 mb-5">
                     <svg
                         width="14"
@@ -519,11 +548,19 @@ const backups = await db.getBackups(10);
                         ><rect x="3" y="3" width="18" height="18" rx="2" ry="2"
                         ></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg
                     >
-                    <h3 class="text-base font-bold m-0 text-[var(--text)]">Panels</h3>
-                    <span class="text-[11px] px-2 py-0.5 bg-[var(--surface-hover)] rounded-full text-[var(--muted)]">{panels.length} total</span>
+                    <h3 class="text-base font-bold m-0 text-[var(--text)]">
+                        Panels
+                    </h3>
+                    <span
+                        class="text-[11px] px-2 py-0.5 bg-[var(--surface-hover)] rounded-full text-[var(--muted)]"
+                        >{panels.length} total</span
+                    >
                 </div>
                 <!-- Warning hint for panels -->
-                <p class="text-[13px] text-[var(--muted)] leading-relaxed mb-5" style="color:#ef4444; opacity:0.8;">
+                <p
+                    class="text-[13px] text-[var(--muted)] leading-relaxed mb-5"
+                    style="color:#ef4444; opacity:0.8;"
+                >
                     Deleting a panel deletes all its categories and links!
                 </p>
 
