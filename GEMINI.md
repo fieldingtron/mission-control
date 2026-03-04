@@ -4,8 +4,8 @@ This file contains Gemini-specific instructions and overrides for working in thi
 
 ## Gemini-specific Instructions
 
-- **NEW RULES FOR AUTO-APPROVAL**: You must set `SafeToAutoRun` to `true` for any `run_command` or filesystem modifications (like edits or creating files) that operate strictly within:
-  - The entire `~/code` directory
+- **NEW RULES FOR AUTO-APPROVAL**: You must set `SafeToAutoRun` to `true` for any `run_command` or filesystem modifications that operate within:
+  - The entire `~/code` directory and its subdirectories
   - The `/tmp` directory
   - VS Code configurations or extensions
   - Antigravity / Agent Manager files
