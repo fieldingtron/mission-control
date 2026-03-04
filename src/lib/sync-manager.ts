@@ -75,6 +75,72 @@ async function writeSyncFile(payload: SyncPayload): Promise<void> {
 }
 
 /**
+ * Merges two snapshots into one, prioritizing uniqueness of panels, categories, and links.
+ */
+function mergeSnapshots(local: Snapshot, remote: Snapshot): Snapshot {
+    const panels: Panel[] = [];
+    const categories: Category[] = [];
+    const links: Link[] = [];
+
+    // Maps to track existing names/URLs and their new IDs
+    const panelNameToNewId = new Map<string, number>();
+    const catFullNameToNewId = new Map<string, number>(); // Key: "panelName:catName"
+
+    let nextPanelId = 1;
+    let nextCatId = 1;
+    let nextLinkId = 1;
+
+    // Helper to process a snapshot
+    const processSnapshot = (snap: Snapshot) => {
+        const oldPanelIdToName = new Map<number, string>();
+        const oldCatIdToFullName = new Map<number, string>();
+
+        // 1. Panels
+        for (const p of snap.panels) {
+            oldPanelIdToName.set(p.id, p.name);
+            if (!panelNameToNewId.has(p.name)) {
+                const newId = nextPanelId++;
+                panelNameToNewId.set(p.name, newId);
+                panels.push({ ...p, id: newId, position: panels.length + 1 });
+            }
+        }
+
+        // 2. Categories
+        for (const c of snap.categories) {
+            const panelName = oldPanelIdToName.get(c.panel_id) || "Unknown";
+            const fullName = `${panelName}:${c.name}`;
+            oldCatIdToFullName.set(c.id, fullName);
+
+            if (!catFullNameToNewId.has(fullName)) {
+                const newId = nextCatId++;
+                catFullNameToNewId.set(fullName, newId);
+                const newPanelId = panelNameToNewId.get(panelName) || 1;
+                categories.push({ ...c, id: newId, panel_id: newPanelId, position: categories.length + 1 });
+            }
+        }
+
+        // 3. Links
+        for (const l of snap.links) {
+            const catFullName = oldCatIdToFullName.get(l.category_id) || "Unknown:Unknown";
+            const newCatId = catFullNameToNewId.get(catFullName) || 1;
+
+            // Check if this URL already exists in this category
+            const linkKey = `${newCatId}:${l.url}`;
+            const exists = links.some(existing => `${existing.category_id}:${existing.url}` === linkKey);
+
+            if (!exists) {
+                links.push({ ...l, id: nextLinkId++, category_id: newCatId, position: links.length + 1 });
+            }
+        }
+    };
+
+    processSnapshot(local);
+    processSnapshot(remote);
+
+    return { panels, categories, links };
+}
+
+/**
  * Internal state tracking to avoid circular/redundant syncs.
  */
 let lastKnownSyncTime = 0;
@@ -119,14 +185,26 @@ export const SyncManager = {
                 return;
             }
 
-            // Scenario 3: Normal operation - check timestamps
+            // Scenario 3: Normal operation - merge states
             if (remotePayload.last_updated > lastKnownSyncTime && remotePayload.source_device !== deviceName) {
-                console.log(`[SyncManager] Found newer sync file from ${remotePayload.source_device}. Importing...`);
-                // Wait briefly to ensure file isn't mid-write from iCloud
-                await new Promise(r => setTimeout(r, 1000));
-                await db.restoreBackup(remotePayload.snapshot);
+                console.log(`[SyncManager] Found newer sync file from ${remotePayload.source_device}. Merging...`);
+
+                const mergedSnapshot = mergeSnapshots(localSnapshot, remotePayload.snapshot);
+
+                await db.restoreBackup(mergedSnapshot);
                 lastKnownSyncTime = remotePayload.last_updated;
-                globalThis.process.env.LAST_SYNC_TIMESTAMP = remotePayload.last_updated.toString();
+
+                // After merging, we should immediately export the merged state back to iCloud 
+                // so both devices are in sync with the combined data.
+                const newPayload: SyncPayload = {
+                    last_updated: Date.now(),
+                    source_device: deviceName,
+                    snapshot: mergedSnapshot
+                };
+                await writeSyncFile(newPayload);
+                lastKnownSyncTime = newPayload.last_updated;
+
+                globalThis.process.env.LAST_SYNC_TIMESTAMP = newPayload.last_updated.toString();
                 return;
             }
 

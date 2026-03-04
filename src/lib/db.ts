@@ -100,16 +100,22 @@ export function initializeAdapter(): void {
 initializeAdapter();
 
 // Initialize JSON Sync if we are running the actual server (not a script)
+console.log(`[DB] NODE_ENV check: ${process.env.NODE_ENV}`);
 if (process.env.NODE_ENV === 'production' && typeof setInterval !== 'undefined') {
+  console.log('[DB] Attempting to start SyncManager loop...');
   import('./sync-manager.js').then(({ SyncManager }) => {
+    console.log('[DB] SyncManager imported successfully.');
     setInterval(() => {
-      SyncManager.evaluateSync().catch(e => console.error('[SyncManager]', e));
+      SyncManager.evaluateSync().catch(e => console.error('[SyncManager] Interval error:', e));
     }, 5 * 60 * 1000);
 
     setTimeout(() => {
-      SyncManager.evaluateSync().catch(e => console.error('[SyncManager]', e));
+      console.log('[DB] Initial 5s SyncManager evaluation starting.');
+      SyncManager.evaluateSync().catch(e => console.error('[SyncManager] Startup error:', e));
     }, 5000);
-  }).catch(() => { });
+  }).catch((err) => {
+    console.error('[DB] Failed to import SyncManager:', err);
+  });
 }
 
 // We export a Proxy so we can re-initialize the adapter at runtime (e.g., when config changes)
