@@ -40,4 +40,17 @@
         background-attachment: fixed;
         color: var(--text);
     }
+
+    .masonry-grid {
+        columns: 3 320px;
+        column-gap: 20px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 32px 96px 32px;
+    }
+
+    .masonry-grid > * {
+        break-inside: avoid;
+        margin-bottom: 20px;
+    }
 }

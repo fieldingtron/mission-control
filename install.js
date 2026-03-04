@@ -25,8 +25,49 @@ async function waitForCaddy(maxSeconds = 10) {
     return false;
 }
 
+async function handleDownloadsMove() {
+    const cwd = process.cwd();
+    const homeDir = os.homedir();
+    const downloadsDir = join(homeDir, 'Downloads');
+
+    if (cwd.startsWith(downloadsDir)) {
+        const targetParent = join(homeDir, 'Documents');
+        const targetDir = join(targetParent, 'mission-control');
+
+        console.log('\n⚠️  Detection: Running from Downloads folder.');
+        console.log(`📂 Movement recommended to: ${targetDir}`);
+
+        if (existsSync(targetDir)) {
+            console.error(`❌ Error: Target directory already exists: ${targetDir}`);
+            console.error('   Please move the project manually or delete the existing folder.');
+            process.exit(1);
+        }
+
+        try {
+            if (!existsSync(targetParent)) mkdirSync(targetParent, { recursive: true });
+
+            console.log('🚚 Moving project to Documents...');
+            // We use a simple copy + instructions approach because moving the CWD of a running process is complex
+            execSync(`cp -R "${cwd}" "${targetDir}"`, { stdio: 'inherit' });
+
+            console.log('\n✅ Project successfully copied to Documents!');
+            console.log('🚀 Please run these commands to continue:');
+            console.log(`   cd "${targetDir}"`);
+            console.log('   npm install');
+            console.log('\n🗑️  You can now delete the folder in Downloads.');
+            process.exit(0);
+        } catch (e) {
+            console.error('❌ Failed to move project:', e.message);
+            process.exit(1);
+        }
+    }
+}
+
 async function run() {
     console.log('📦 Starting Mission Control Universal Installer...');
+
+    // 0. Check for Downloads folder
+    await handleDownloadsMove();
 
     // 1. Check Node Version
     const nodeVersion = process.versions.node.split('.')[0];

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-03-03
+
+### Added
+- **Auto-Relocation Logic**: Updated `install.js` and `install-macos-service.sh` to automatically detect if the project is in the `Downloads` folder and offer to move it to `~/Documents` for stability.
+
+### Fixed
+- **Masonry Layout Persistence**: Fixed a bug where the dashboard grid would collapse into a single column after HTMX partial swaps by centralizing styles in `global.css` and applying the `.masonry-grid` class to the grid fragment.
+
+---
 ## [1.1.0] - 2026-02-28
 
 ### Added

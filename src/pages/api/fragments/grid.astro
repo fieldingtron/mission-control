@@ -41,8 +41,9 @@ const data = categories.map((c) => ({
 }));
 ---
 
-<main
+<div
   id="grid"
+  class="masonry-grid"
   x-data
   x-init={`
   Sortable.create($el, {
@@ -80,4 +81,4 @@ const data = categories.map((c) => ({
       </div>
     )
   }
-</main>
+</div>

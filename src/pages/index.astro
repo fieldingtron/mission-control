@@ -888,9 +888,8 @@ const data = categories.map((c) => ({
               <Settings />
             ) : (
               <div
-                class="p-8 pb-24 mx-auto w-full [&_div.break-inside-avoid]:break-inside-avoid"
+                class="masonry-grid"
                 id="grid"
-                style="columns: 3 320px; column-gap: 20px;"
                 x-data
                 x-init="
                 Sortable.create($el, {

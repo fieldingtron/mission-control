@@ -8,6 +8,27 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# 0. Check for Downloads folder
+CWD=$(pwd)
+if [[ "$CWD" == "$HOME/Downloads"* ]]; then
+    TARGET_DIR="$HOME/Documents/mission-control"
+    echo "⚠️  Detection: Running from Downloads folder."
+    echo "📂 Movement recommended to: $TARGET_DIR"
+
+    if [ -d "$TARGET_DIR" ]; then
+        echo "❌ Error: Target directory already exists: $TARGET_DIR"
+        exit 1
+    fi
+
+    echo "🚚 Moving project to Documents..."
+    cp -R "$CWD" "$TARGET_DIR"
+    echo "✅ Project successfully copied to Documents!"
+    echo "🚀 Please run these commands to continue:"
+    echo "   cd \"$TARGET_DIR\""
+    echo "   ./install-macos-service.sh"
+    exit 0
+fi
+
 # 1. Dependency Checks
 echo "🔍 Checking system dependencies..."
 
