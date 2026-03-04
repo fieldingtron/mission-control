@@ -893,12 +893,21 @@ const data = categories.map((c) => ({
                 style="columns: 3 320px; column-gap: 20px;"
                 x-data
                 x-init="
+                Sortable.create($el, {
+                  animation: 150,
+                  handle: '.drag-handle-cat',
+                  onEnd: async () => {
+                    const ids = Array.from($el.children).map(el => el.getAttribute('data-id')).filter(id => id);
+                    if (window.playMoveSound) window.playMoveSound();
+                    await fetch('/api/categories/reorder', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ ids })
                     });
                     if (window.dashboardBc) window.dashboardBc.postMessage({ type: 'refresh' });
                   }
                 });
-              "
+                "
               >
                 {data.length > 0 ? (
                   data.map((cat) => (

@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import os from 'node:os';
 import db, { Backup, Category, Link, Panel, Snapshot } from './db.js';
@@ -23,30 +24,59 @@ function ensureDocDir() {
 }
 
 /**
+ * Utility to pause execution
+ */
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
  * Reads the sync JSON file if it exists.
  */
-function readSyncFile(): SyncPayload | null {
+async function readSyncFile(retries = 3): Promise<SyncPayload | null> {
     if (!existsSync(syncFilePath)) return null;
-    try {
-        const fileContent = readFileSync(syncFilePath, 'utf-8');
-        return JSON.parse(fileContent) as SyncPayload;
-    } catch (err) {
-        console.error('[SyncManager] Failed to read sync file:', err);
-        return null;
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const fileContent = await readFile(syncFilePath, 'utf-8');
+            return JSON.parse(fileContent) as SyncPayload;
+        } catch (err: any) {
+            // Handle ENOENT gracefully just in case it disappears during operation
+            if (err.code === 'ENOENT') return null;
+
+            // Handle EAGAIN/EWOULDBLOCK (-11) or other temporary locks from iCloud
+            if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.errno === -11) {
+                console.warn(`[SyncManager] File locked by iCloud (read attempt ${i + 1}/${retries}). Retrying in 500ms...`);
+                await delay(500);
+                continue;
+            }
+            console.error('[SyncManager] Failed to read sync file:', err);
+            throw err;
+        }
     }
+    throw new Error(`[SyncManager] Failed to read sync file after ${retries} retries due to persistent locks.`);
 }
 
 /**
  * Writes the sync JSON file.
  */
-function writeSyncFile(payload: SyncPayload) {
+async function writeSyncFile(payload: SyncPayload, retries = 3): Promise<void> {
     ensureDocDir();
-    try {
-        writeFileSync(syncFilePath, JSON.stringify(payload, null, 2), 'utf-8');
-        console.log(`[SyncManager] Successfully exported sync snapshot to ${syncFilePath}`);
-    } catch (err) {
-        console.error('[SyncManager] Failed to write sync file:', err);
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            await writeFile(syncFilePath, JSON.stringify(payload, null, 2), 'utf-8');
+            console.log(`[SyncManager] Successfully exported sync snapshot to ${syncFilePath}`);
+            return;
+        } catch (err: any) {
+            if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.errno === -11) {
+                console.warn(`[SyncManager] File locked by iCloud (write attempt ${i + 1}/${retries}). Retrying in 500ms...`);
+                await delay(500);
+                continue;
+            }
+            console.error('[SyncManager] Failed to write sync file:', err);
+            throw err;
+        }
     }
+    throw new Error(`[SyncManager] Failed to write sync file after ${retries} retries due to persistent locks.`);
 }
 
 /**
@@ -66,7 +96,7 @@ export const SyncManager = {
             const localSnapshot = await db.getFullSnapshot();
             const localTotalItems = localSnapshot.panels.length + localSnapshot.categories.length + localSnapshot.links.length;
 
-            const remotePayload = readSyncFile();
+            const remotePayload = await readSyncFile();
 
             // Scenario 1: No remote file exists yet. We should create one.
             if (!remotePayload) {
@@ -76,7 +106,7 @@ export const SyncManager = {
                     source_device: deviceName,
                     snapshot: localSnapshot
                 };
-                writeSyncFile(newPayload);
+                await writeSyncFile(newPayload);
                 lastKnownSyncTime = newPayload.last_updated;
                 return;
             }
@@ -126,7 +156,7 @@ export const SyncManager = {
                     source_device: deviceName,
                     snapshot: localSnapshot
                 };
-                writeSyncFile(newPayload);
+                await writeSyncFile(newPayload);
                 lastKnownSyncTime = newPayload.last_updated;
             } else if (localString !== remoteString && remotePayload.source_device !== deviceName && remotePayload.last_updated <= lastKnownSyncTime) {
                 // We made a change, but the file was last written by someone else longer ago
@@ -137,7 +167,7 @@ export const SyncManager = {
                     source_device: deviceName,
                     snapshot: localSnapshot
                 };
-                writeSyncFile(newPayload);
+                await writeSyncFile(newPayload);
                 lastKnownSyncTime = newPayload.last_updated;
             } else {
                 // They match, or nothing to do

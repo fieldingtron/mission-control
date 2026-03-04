@@ -13,6 +13,10 @@ export default defineConfig({
     host: true,
   },
 
+  security: {
+    checkOrigin: false
+  },
+
   vite: {
     plugins: [tailwindcss()]
   }

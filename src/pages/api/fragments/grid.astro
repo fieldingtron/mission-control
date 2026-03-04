@@ -63,7 +63,7 @@ const data = categories.map((c) => ({
 >
   {
     data.length > 0 ? (
-      data.map((cat) => <Category category={cat} />)
+      data.map((cat) => <Category category={cat} links={cat.links} />)
     ) : (
       <div class="empty-page">
         {query ? (
