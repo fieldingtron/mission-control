@@ -5,8 +5,7 @@ A premium, high-performance link and bookmark dashboard built with the **AHAStac
 ## Features
 
 - 🚀 **AHAStack**: Lightning-fast server-side rendering with reactive partial updates.
-- ☁️ **Centralized Supabase Sync**: Your dashboard lives in the cloud via Supabase PostgreSQL, keeping your laptops and desktops perfectly synced.
-- 🔐 **Zero-Config Master Password**: Simple, strict single-user session authentication keeps your private DB safe.
+- ☁️ **Local SQLite Database**: Fast, lightweight, local database using libSQL.
 - 🧩 **Masonry Layout**: Categories automatically pack together tightly into columns for a beautiful Pinterest-style aesthetic.
 - 📂 **Netscape Bookmark Imports**: Easily import your existing nested browser bookmarks, automatically parsed and flattened into categories.
 - ↔️ **Drag & Drop**: Reorder your panels, categories, and links with ease (powered by Sortable.js).
@@ -17,47 +16,39 @@ A premium, high-performance link and bookmark dashboard built with the **AHAStac
 ### Prerequisites
 
 - **Node.js 18+**
-- **Supabase Account**: You must provision a free Supabase Postgres project to store the data.
 
-### Installation
+### Setup
 
-1. **Clone the repository** (if you haven't already):
+**Clone the repository** (if you haven't already):
    ```bash
    git clone <repository-url>
-   cd project1
+   cd mission-control
    ```
 
-2. **Install all Node dependencies**:
-   This includes core packages like Astro, HTMX, and the newly added `dotenv` for environment variable management.
-   ```bash
-   npm install
-   ```
+### Running the Application
 
-3. **Create a Supabase Project**:
-   - Go to [supabase.com](https://supabase.com) and create a free account.
-   - Click **New Project** and choose a secure database password (save it!).
-   - Once the database provisions (takes ~2 minutes), go to **Project Settings > API** to find your keys.
+Mission Control now features a universal setup script that automatically configures local HTTPS (via Caddy) at `https://dashboard.localhost`.
 
-4. **Configure your Environment Variables**:  
-   Create a new file named `.env` in the absolute root of the project directory and add your Supabase connection strings:
-   ```env
-   SUPABASE_URL=https://your-project.supabase.co
-   SUPABASE_ANON_KEY=ey...
-   ADMIN_PASSWORD=your-secure-master-password
-   ```
+#### Option A: macOS Background Service (Recommended)
+This installs all dependencies, builds the production app, and registers it as an autostarting macOS Launch Agent.
 
-5. **Provision the Database Schema**:  
-   - Open your Supabase dashboard and navigate to the **SQL Editor** tab.
-   - Click **New Query**.
-   - Copy the entire contents of the `supabase-schema.sql` file provided in this repository.
-   - Paste it into the editor and click **Run**. This creates the `panels`, `categories`, `links`, and `backups` tables.
+```bash
+chmod +x install-macos-service.sh
+./install-macos-service.sh
+```
 
-6. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
+Once complete, the service will run silently in the background on your Mac. You can access it anytime at [https://dashboard.localhost](https://dashboard.localhost). 
+Logs can be monitored at `/tmp/com.fieldingtron.mission-control.log`.
 
-Open [http://localhost:4321](http://localhost:4321) in your browser. (Note: The `localhost-dev` auto-HTTPS proxy is available for advanced Caddy environments).
+#### Option B: Universal / Development Mode
+This will install dependencies (including configuring Caddy via the `postinstall` script) and run the live development server.
+
+```bash
+npm install
+npm run dev
+```
+
+Open [https://dashboard.localhost](https://dashboard.localhost) in your browser.
 
 ## Tech Stack
 
@@ -65,14 +56,13 @@ Open [http://localhost:4321](http://localhost:4321) in your browser. (Note: The 
 - **HTMX**: High-power tools for HTML (AJAX, CSS Transitions).
 - **Alpine.js**: Lightweight JavaScript framework for client-side interactivity.
 - **Vanilla CSS**: Clean, performant styling without the overhead of a CSS-in-JS or Tailwind.
-- **Supabase**: Centralized PostgreSQL database via the `@supabase/supabase-js` Rest API.
+- **SQLite**: Local relational database using `libsql` for high performance.
 
 ## Project Structure
 
-- `src/pages/`: Main application routes (Dashboard, Login).
+- `src/pages/`: Main application routes (Dashboard).
 - `src/pages/api/`: HTMX backend action routes and Astro middleware.
 - `src/lib/`: Database Adapters and utility functions.
-- `supabase-schema.sql`: The database schema definition.
 
 ## System Architecture
 
@@ -115,13 +105,12 @@ Below is a high-level text flowchart detailing the technology stack architecture
 |  +---------------------------------------------------------------------------+  |
 |  |                    src/lib/drizzle-adapter.ts                             |  |
 |  |  - Drizzle ORM queries & transactions                                     |  |
-|  |  - syncSequences via postgres.js wrapper                                  |  |
 |  +---------------------------------------------------------------------------+  |
 +---------------------------------------------------------------------------------+
                                          |
                                          v
 +---------------------------------------------------------------------------------+
-|                         PostgreSQL Database (Supabase)                          |
+|                            SQLite Database (libSQL)                             |
 |                                                                                 |
 |  +---------------+    +-------------------+    +-------------------+            |
 |  |    panels     |--->|    categories     |--->|      links        |            |

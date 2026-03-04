@@ -611,6 +611,26 @@ const data = categories.map((c) => ({
           }
         }
       };
+      
+      // iCloud JSON Sync Poller
+      let lastKnownSync = 0;
+      setInterval(async () => {
+        try {
+          const res = await fetch('/api/sync/status');
+          if (res.ok) {
+            const data = await res.json();
+            const serverSync = parseInt(data.last_sync, 10);
+            if (serverSync > lastKnownSync) {
+                if (lastKnownSync > 0) {
+                    console.log('Background Sync Detected! Refreshing UI...');
+                    self.reloadGrid();
+                    self.reloadSidebar();
+                }
+                lastKnownSync = serverSync;
+            }
+          }
+        } catch(e) {}
+      }, 30000);
 
       // Watch theme and broadcast
       $watch('theme', (val) => {

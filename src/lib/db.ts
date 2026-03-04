@@ -99,6 +99,19 @@ export function initializeAdapter(): void {
 // Initialize on startup
 initializeAdapter();
 
+// Initialize JSON Sync if we are running the actual server (not a script)
+if (process.env.NODE_ENV === 'production' && typeof setInterval !== 'undefined') {
+  import('./sync-manager.js').then(({ SyncManager }) => {
+    setInterval(() => {
+      SyncManager.evaluateSync().catch(e => console.error('[SyncManager]', e));
+    }, 5 * 60 * 1000);
+
+    setTimeout(() => {
+      SyncManager.evaluateSync().catch(e => console.error('[SyncManager]', e));
+    }, 5000);
+  }).catch(() => { });
+}
+
 // We export a Proxy so we can re-initialize the adapter at runtime (e.g., when config changes)
 const dbProxy = new Proxy<DatabaseAdapter>({} as DatabaseAdapter, {
   get(target, prop) {
