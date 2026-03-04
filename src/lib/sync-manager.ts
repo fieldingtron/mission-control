@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import os from 'node:os';
 import db, { Backup, Category, Link, Panel, Snapshot } from './db.js';
@@ -31,52 +32,46 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 /**
  * Reads the sync JSON file if it exists.
  */
-async function readSyncFile(retries = 3): Promise<SyncPayload | null> {
+async function readSyncFile(): Promise<SyncPayload | null> {
     if (!existsSync(syncFilePath)) return null;
 
-    for (let i = 0; i < retries; i++) {
-        try {
-            const fileContent = await readFile(syncFilePath, 'utf-8');
-            return JSON.parse(fileContent) as SyncPayload;
-        } catch (err: any) {
-            // Handle ENOENT gracefully just in case it disappears during operation
-            if (err.code === 'ENOENT') return null;
+    try {
+        // Force macOS iCloud Drive to physically download the file if it's currently a cloud placeholder
+        spawnSync('brctl', ['download', syncFilePath]);
 
-            // Handle EAGAIN/EWOULDBLOCK (-11) or other temporary locks from iCloud
-            if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.errno === -11) {
-                console.warn(`[SyncManager] File locked by iCloud (read attempt ${i + 1}/${retries}). Retrying in 500ms...`);
-                await delay(500);
-                continue;
-            }
-            console.error('[SyncManager] Failed to read sync file:', err);
-            throw err;
+        const fileContent = await readFile(syncFilePath, 'utf-8');
+        return JSON.parse(fileContent) as SyncPayload;
+    } catch (err: any) {
+        // Handle normal missing files
+        if (err.code === 'ENOENT') return null;
+
+        // If iCloud is aggressively locking the file, just skip this sync cycle
+        if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.errno === -11) {
+            console.warn(`[SyncManager] File temporarily locked by iCloud (read). Skipping this cycle.`);
+            return null;
         }
+
+        console.error('[SyncManager] Failed to read sync file:', err);
+        return null; // Return null instead of throwing so we don't crash
     }
-    throw new Error(`[SyncManager] Failed to read sync file after ${retries} retries due to persistent locks.`);
 }
 
 /**
  * Writes the sync JSON file.
  */
-async function writeSyncFile(payload: SyncPayload, retries = 3): Promise<void> {
+async function writeSyncFile(payload: SyncPayload): Promise<void> {
     ensureDocDir();
 
-    for (let i = 0; i < retries; i++) {
-        try {
-            await writeFile(syncFilePath, JSON.stringify(payload, null, 2), 'utf-8');
-            console.log(`[SyncManager] Successfully exported sync snapshot to ${syncFilePath}`);
+    try {
+        await writeFile(syncFilePath, JSON.stringify(payload, null, 2), 'utf-8');
+        console.log(`[SyncManager] Successfully exported sync snapshot to ${syncFilePath}`);
+    } catch (err: any) {
+        if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.errno === -11) {
+            console.warn(`[SyncManager] File temporarily locked by iCloud (write). Skipping export this cycle.`);
             return;
-        } catch (err: any) {
-            if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.errno === -11) {
-                console.warn(`[SyncManager] File locked by iCloud (write attempt ${i + 1}/${retries}). Retrying in 500ms...`);
-                await delay(500);
-                continue;
-            }
-            console.error('[SyncManager] Failed to write sync file:', err);
-            throw err;
         }
+        console.error('[SyncManager] Failed to write sync file:', err);
     }
-    throw new Error(`[SyncManager] Failed to write sync file after ${retries} retries due to persistent locks.`);
 }
 
 /**
